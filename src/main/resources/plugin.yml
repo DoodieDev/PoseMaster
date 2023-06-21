@@ -1,0 +1,5 @@
+name: PoseMaster
+version: '${project.version}'
+main: doodieman.posemaster.PoseMaster
+authors: [DoodieMan]
+description: The plugin to change armorstand positions to your liking!
