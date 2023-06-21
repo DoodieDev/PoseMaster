@@ -56,7 +56,7 @@ public class PoseMenuPositions extends GUI {
 
         //Create bottom items
         this.createBottomItems();
-        this.layout.put(4, new ItemBuilder(Material.BEACON,"§b§lPoseMaster","§bVersion 1.0.0", "", "§fUnlock the power of customization with", "§fPoseMaster! Control every aspect of ArmorStands.", "", "§bMade by §3DoodieMan").build());
+        this.layout.put(4, new ItemBuilder(Material.BEACON,"§b§lPoseMaster","§bVersion 1.0.0", "", "§fUnlock the power of customization with PoseMaster!", "§fControl every aspect of ArmorStands.", "", "§bMade by §3DoodieMan").build());
 
 
         //LEFT ARM
@@ -113,7 +113,7 @@ public class PoseMenuPositions extends GUI {
         this.actionSlots.put(7, "MOVE");
 
         //Rotate
-        this.layout.put(1, new ItemBuilder(Material.MINECART,"§6§lRotate","", "§7Current: §f"+ StringUtil.roundDecimals(armorStand.getLocation().getYaw(), 4), "", "§aClick to change!").build());
+        this.layout.put(1, new ItemBuilder(Material.MINECART,"§7§lRotation","", "§7Current: §f"+ StringUtil.roundDecimals(armorStand.getLocation().getYaw(), 4), "", "§aClick to change!").build());
         this.actionSlots.put(1, "ROTATE");
 
         super.render();

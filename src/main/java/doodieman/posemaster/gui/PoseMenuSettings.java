@@ -61,7 +61,7 @@ public class PoseMenuSettings extends GUI {
         //Toggle Small
         String currentSmall = armorStand.isSmall() ? "§aEnabled" : "§cDisabled";
         ItemBuilder small = new ItemBuilder(Material.DOUBLE_PLANT)
-            .name("§6§lSmall")
+            .name("§e§lSmall")
             .lore("", "§7Current: "+currentSmall, "", "§aClick to toggle!");
         if (armorStand.isSmall()) small.makeGlowing();
 
@@ -70,14 +70,14 @@ public class PoseMenuSettings extends GUI {
         ((CraftEntity) armorStand).getHandle().c(tag);
         String currentInvul = tag.getInt("Invulnerable") == 1 ? "§aEnabled" : "§cDisabled";
         ItemBuilder invulnerable = new ItemBuilder(Material.GOLDEN_APPLE)
-            .name("§f§lInvulnerable")
+            .name("§e§lInvulnerable")
             .lore("", "§7Current: "+currentInvul, "", "§aClick to toggle!");
         if (tag.getInt("Invulnerable") == 1) invulnerable.makeGlowing();
 
         //Visible
         String currentVisible = armorStand.isVisible() ? "§aEnabled" : "§cDisabled";
         ItemBuilder visible = new ItemBuilder(Material.GLASS_BOTTLE)
-            .name("§f§lVisibility")
+            .name("§b§lVisibility")
             .lore("", "§7Current: "+currentVisible, "", "§aClick to toggle!");
         if (armorStand.isVisible()) visible.makeGlowing();
         if (armorStand.isVisible()) visible.material(Material.POTION);
@@ -92,7 +92,7 @@ public class PoseMenuSettings extends GUI {
         //Gravity
         String currentGravity = armorStand.hasGravity() ? "§aEnabled" : "§cDisabled";
         ItemBuilder gravity = new ItemBuilder(Material.FEATHER)
-            .name("§b§lGravity")
+            .name("§f§lGravity")
             .lore("", "§7Current: "+currentGravity, "", "§aClick to toggle!");
         if (armorStand.hasGravity()) gravity.makeGlowing();
 
@@ -106,7 +106,7 @@ public class PoseMenuSettings extends GUI {
         //Baseplate
         String currentBaseplate = armorStand.hasBasePlate() ? "§aEnabled" : "§cDisabled";
         ItemBuilder baseplate = new ItemBuilder(Material.STEP)
-            .name("§f§lBaseplate")
+            .name("§7§lBaseplate")
             .lore("", "§7Current: "+currentBaseplate, "", "§aClick to toggle!");
         if (armorStand.hasBasePlate()) baseplate.makeGlowing();
 
@@ -120,7 +120,7 @@ public class PoseMenuSettings extends GUI {
         //Change name
         String currentName = armorStand.getCustomName() == null ? "§fArmor Stand" : StringUtil.colorize(armorStand.getCustomName());
         ItemBuilder changeName = new ItemBuilder(Material.SIGN)
-            .name("§6§lChange Name")
+            .name("§e§lChange Name")
             .lore("", "§7Current: "+currentName, "", "§aClick to change!");
         if (armorStand.getCustomName() != null) changeName.makeGlowing();
 
