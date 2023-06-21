@@ -27,11 +27,6 @@ public class StringUtil {
         return numberFormat.format(input);
     }
 
-    public static double roundDecimals(double input, int decimals) {
-        double scale = Math.pow(10, decimals);
-        return Math.round(input * scale) / scale;
-    }
-
     public static double roundTwoDecimals(double input) {
         DecimalFormat decimalFormat = new DecimalFormat("#.##");
         return Double.parseDouble(decimalFormat.format(input));

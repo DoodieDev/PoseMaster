@@ -108,12 +108,12 @@ public class PoseMenuPositions extends GUI {
         this.actionSlots.put(26, "RIGHTLEG-Z");
 
         //MOVE
-        String formattedCoord = StringUtil.roundDecimals(armorStand.getLocation().getX(), 4)+" "+StringUtil.roundDecimals(armorStand.getLocation().getY(), 4)+" "+StringUtil.roundDecimals(armorStand.getLocation().getZ(), 4);
+        String formattedCoord = StringUtil.roundTwoDecimals(armorStand.getLocation().getX())+" "+StringUtil.roundTwoDecimals(armorStand.getLocation().getY())+" "+StringUtil.roundTwoDecimals(armorStand.getLocation().getZ());
         this.layout.put(7, new ItemBuilder(Material.PISTON_BASE,"§6§lLocation","", "§7Current: §f"+ formattedCoord, "", "§aClick to change!").build());
         this.actionSlots.put(7, "MOVE");
 
         //Rotate
-        this.layout.put(1, new ItemBuilder(Material.MINECART,"§6§lRotate","", "§7Current: §f"+ StringUtil.roundDecimals(armorStand.getLocation().getYaw(), 4), "", "§aClick to change!").build());
+        this.layout.put(1, new ItemBuilder(Material.MINECART,"§6§lRotate","", "§7Current: §f"+ StringUtil.roundTwoDecimals(armorStand.getLocation().getYaw()), "", "§aClick to change!").build());
         this.actionSlots.put(1, "ROTATE");
 
         super.render();
@@ -253,7 +253,7 @@ public class PoseMenuPositions extends GUI {
     }
 
     public double radiansToDegreesRounded(double radians) {
-        return StringUtil.roundDecimals(this.radiansToDegrees(radians), 4);
+        return StringUtil.roundTwoDecimals(this.radiansToDegrees(radians));
     }
 
     public Vector stringToVector(String text) {
