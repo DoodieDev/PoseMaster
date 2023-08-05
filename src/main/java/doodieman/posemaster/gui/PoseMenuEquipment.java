@@ -3,7 +3,6 @@ package doodieman.posemaster.gui;
 import doodieman.posemaster.PoseMaster;
 import doodieman.posemaster.utils.GUI;
 import doodieman.posemaster.utils.ItemBuilder;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
@@ -81,6 +80,8 @@ public class PoseMenuEquipment extends GUI {
 
         if (!actionSlots.containsKey(slot)) return;
         String action = actionSlots.get(slot);
+
+        this.playClickSound();
 
         switch (action) {
             case "PAGE-EQUIPMENT":

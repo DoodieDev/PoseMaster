@@ -1,10 +1,10 @@
 package doodieman.posemaster.gui;
 
+import doodieman.posemaster.PoseMaster;
 import doodieman.posemaster.utils.GUI;
 import doodieman.posemaster.utils.ItemBuilder;
 import doodieman.posemaster.utils.StringUtil;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 import org.bukkit.entity.ArmorStand;
@@ -12,7 +12,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
-import org.graalvm.compiler.lir.aarch64.AArch64ArithmeticOp.ARMv8ConstantCategory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -175,6 +174,8 @@ public class PoseMenuSettings extends GUI {
         if (!actionSlots.containsKey(slot)) return;
         String action = actionSlots.get(slot);
 
+        this.playClickSound();
+
         switch (action) {
             case "PAGE-EQUIPMENT":
                 new PoseMenuEquipment(player,armorStand).open();
@@ -243,8 +244,7 @@ public class PoseMenuSettings extends GUI {
                 break;
 
             case "CHANGENAME":
-                player.sendMessage("§aType the new name of the armorstand.");
-                player.sendMessage("§aColor codes are supported!");
+                PoseMaster.sendMessage(player,"§7Enter the new name for the ArmorStand.");
                 player.closeInventory();
 
                 new PoseAwaitResponse(player,600L) {
@@ -253,14 +253,13 @@ public class PoseMenuSettings extends GUI {
                     public void onRespond(String message) {
                         String value = StringUtil.colorize(message);
                         armorStand.setCustomName(value);
-                        player.sendMessage("§aSuccessfully changed the Armorstand name to '"+value+"'!");
+                        PoseMaster.sendMessage(player,"§aChanged the name to §2'"+value+"§2'§a!");
                     }
 
                     @Override
                     public void onTimeout() {
-                        player.sendMessage("§cYou took too long to respond. Open the menu to try again!");
+                        PoseMaster.sendMessage(player,"§cYou took too long to respond!");
                     }
-
                 };
                 break;
 
