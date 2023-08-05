@@ -19,7 +19,7 @@ public class PMCommandPaste {
         Location location = new Location(
             player.getWorld(),
             player.getLocation().getBlockX()+0.5,
-            player.getLocation().getBlockY(),
+            player.getLocation().getY(),
             player.getLocation().getBlockZ()+0.5
         );
 
