@@ -28,6 +28,34 @@ public class PoseMenuPositions extends GUI {
         this.armorStand = armorStand;
     }
 
+    @Override
+    public void render() {
+
+        //Create bottom items
+        this.createBottomItems();
+
+        //Duplicate
+        this.layout.put(4, new ItemBuilder(Material.PRISMARINE_CRYSTALS,"§d§lDuplicate","", "§fCreates a duplicate", "§fof this ArmorStand.", "", "§aClick to duplicate!").build());
+        this.actionSlots.put(4, "DUPLICATE");
+
+        //MOVE
+        String formattedCoord = StringUtil.roundDecimals(armorStand.getLocation().getX(), 4)+" "+StringUtil.roundDecimals(armorStand.getLocation().getY(), 4)+" "+StringUtil.roundDecimals(armorStand.getLocation().getZ(), 4);
+        this.layout.put(7, new ItemBuilder(Material.PISTON_BASE,"§6§lLocation","", "§7Current: §f"+ formattedCoord, "", "§aClick to change!").build());
+        this.actionSlots.put(7, "MOVE");
+
+        //Rotate
+        this.layout.put(1, new ItemBuilder(Material.MINECART,"§7§lRotation","", "§7Current: §f"+ StringUtil.roundDecimals(armorStand.getLocation().getYaw(), 4), "", "§aClick to change!").build());
+        this.actionSlots.put(1, "ROTATE");
+
+        //Poses
+        this.createArmPoses();
+        this.createLegPoses();
+        this.createBodyPoses();
+        this.createHeadPoses();
+
+        super.render();
+    }
+
     public void createBottomItems() {
         //Create glass fill
         for (int i = 0; i < 9; i++)
@@ -51,14 +79,7 @@ public class PoseMenuPositions extends GUI {
         this.actionSlots.put(41, "PAGE-SETTINGS");
     }
 
-    @Override
-    public void render() {
-
-        //Create bottom items
-        this.createBottomItems();
-        this.layout.put(4, new ItemBuilder(Material.BEACON,"§b§lPoseMaster","§bVersion 1.0.0", "", "§fUnlock the power of customization with", "§fPoseMaster! Control every aspect of ArmorStands.", "", "§bMade by §3DoodieMan").build());
-
-
+    public void createArmPoses() {
         //LEFT ARM
         this.layout.put(9, new ItemBuilder(Material.BONE,"§f§lLeft Arm: X","", "§7Current: §f"+radiansToDegreesRounded(armorStand.getLeftArmPose().getX()),"","§aClick to change!").build());
         this.actionSlots.put(9, "LEFTARM-X");
@@ -67,14 +88,6 @@ public class PoseMenuPositions extends GUI {
         this.layout.put(11, new ItemBuilder(Material.BONE,"§f§lLeft Arm: Z","", "§7Current: §f"+radiansToDegreesRounded(armorStand.getLeftArmPose().getZ()),"","§aClick to change!").build());
         this.actionSlots.put(11, "LEFTARM-Z");
 
-        //HEAD
-        this.layout.put(12, new ItemBuilder(Material.DIAMOND_HELMET,"§b§lHead: X","", "§7Current: §f"+radiansToDegreesRounded(armorStand.getHeadPose().getX()),"","§aClick to change!").build());
-        this.actionSlots.put(12, "HEAD-X");
-        this.layout.put(13, new ItemBuilder(Material.DIAMOND_HELMET,"§b§lHead: Y","", "§7Current: §f"+radiansToDegreesRounded(armorStand.getHeadPose().getY()),"","§aClick to change!").build());
-        this.actionSlots.put(13, "HEAD-Y");
-        this.layout.put(14, new ItemBuilder(Material.DIAMOND_HELMET,"§b§lHead: Z","", "§7Current: §f"+radiansToDegreesRounded(armorStand.getHeadPose().getZ()),"","§aClick to change!").build());
-        this.actionSlots.put(14, "HEAD-Z");
-
         //RIGHT ARM
         this.layout.put(15, new ItemBuilder(Material.BLAZE_ROD,"§e§lRight Arm: X","", "§7Current: §f"+radiansToDegreesRounded(armorStand.getRightArmPose().getX()),"","§aClick to change!").build());
         this.actionSlots.put(15, "RIGHTARM-X");
@@ -82,7 +95,9 @@ public class PoseMenuPositions extends GUI {
         this.actionSlots.put(16, "RIGHTARM-Y");
         this.layout.put(17, new ItemBuilder(Material.BLAZE_ROD,"§e§lRight Arm: Z","", "§7Current: §f"+radiansToDegreesRounded(armorStand.getRightArmPose().getZ()),"","§aClick to change!").build());
         this.actionSlots.put(17, "RIGHTARM-Z");
+    }
 
+    public void createLegPoses() {
         //LEFT LEG
         this.layout.put(18, new ItemBuilder(Material.IRON_LEGGINGS,"§f§lLeft Leg: X","", "§7Current: §f"+radiansToDegreesRounded(armorStand.getLeftLegPose().getX()),"","§aClick to change!").build());
         this.actionSlots.put(18, "LEFTLEG-X");
@@ -91,14 +106,6 @@ public class PoseMenuPositions extends GUI {
         this.layout.put(20, new ItemBuilder(Material.IRON_LEGGINGS,"§f§lLeft Leg: Z","", "§7Current: §f"+radiansToDegreesRounded(armorStand.getLeftLegPose().getZ()),"","§aClick to change!").build());
         this.actionSlots.put(20, "LEFTLEG-Z");
 
-        //BODY
-        this.layout.put(21, new ItemBuilder(Material.DIAMOND_CHESTPLATE,"§b§lBody: X","", "§7Current: §f"+radiansToDegreesRounded(armorStand.getBodyPose().getX()),"","§aClick to change!").build());
-        this.actionSlots.put(21, "BODY-X");
-        this.layout.put(22, new ItemBuilder(Material.DIAMOND_CHESTPLATE,"§b§lBody: Y","", "§7Current: §f"+radiansToDegreesRounded(armorStand.getBodyPose().getY()),"","§aClick to change!").build());
-        this.actionSlots.put(22, "BODY-Y");
-        this.layout.put(23, new ItemBuilder(Material.DIAMOND_CHESTPLATE,"§b§lBody: Z","", "§7Current: §f"+radiansToDegreesRounded(armorStand.getBodyPose().getZ()),"","§aClick to change!").build());
-        this.actionSlots.put(23, "BODY-Z");
-
         //RIGHT LEG
         this.layout.put(24, new ItemBuilder(Material.GOLD_LEGGINGS,"§e§lRight Leg: X","", "§7Current: §f"+radiansToDegreesRounded(armorStand.getRightLegPose().getX()),"","§aClick to change!").build());
         this.actionSlots.put(24, "RIGHTLEG-X");
@@ -106,17 +113,26 @@ public class PoseMenuPositions extends GUI {
         this.actionSlots.put(25, "RIGHTLEG-Y");
         this.layout.put(26, new ItemBuilder(Material.GOLD_LEGGINGS,"§e§lRight Leg: Z","", "§7Current: §f"+radiansToDegreesRounded(armorStand.getRightLegPose().getZ()),"","§aClick to change!").build());
         this.actionSlots.put(26, "RIGHTLEG-Z");
+    }
 
-        //MOVE
-        String formattedCoord = StringUtil.roundTwoDecimals(armorStand.getLocation().getX())+" "+StringUtil.roundTwoDecimals(armorStand.getLocation().getY())+" "+StringUtil.roundTwoDecimals(armorStand.getLocation().getZ());
-        this.layout.put(7, new ItemBuilder(Material.PISTON_BASE,"§6§lLocation","", "§7Current: §f"+ formattedCoord, "", "§aClick to change!").build());
-        this.actionSlots.put(7, "MOVE");
+    public void createBodyPoses() {
+        //BODY
+        this.layout.put(21, new ItemBuilder(Material.DIAMOND_CHESTPLATE,"§b§lBody: X","", "§7Current: §f"+radiansToDegreesRounded(armorStand.getBodyPose().getX()),"","§aClick to change!").build());
+        this.actionSlots.put(21, "BODY-X");
+        this.layout.put(22, new ItemBuilder(Material.DIAMOND_CHESTPLATE,"§b§lBody: Y","", "§7Current: §f"+radiansToDegreesRounded(armorStand.getBodyPose().getY()),"","§aClick to change!").build());
+        this.actionSlots.put(22, "BODY-Y");
+        this.layout.put(23, new ItemBuilder(Material.DIAMOND_CHESTPLATE,"§b§lBody: Z","", "§7Current: §f"+radiansToDegreesRounded(armorStand.getBodyPose().getZ()),"","§aClick to change!").build());
+        this.actionSlots.put(23, "BODY-Z");
+    }
 
-        //Rotate
-        this.layout.put(1, new ItemBuilder(Material.MINECART,"§6§lRotate","", "§7Current: §f"+ StringUtil.roundTwoDecimals(armorStand.getLocation().getYaw()), "", "§aClick to change!").build());
-        this.actionSlots.put(1, "ROTATE");
-
-        super.render();
+    public void createHeadPoses() {
+        //HEAD
+        this.layout.put(12, new ItemBuilder(Material.DIAMOND_HELMET,"§b§lHead: X","", "§7Current: §f"+radiansToDegreesRounded(armorStand.getHeadPose().getX()),"","§aClick to change!").build());
+        this.actionSlots.put(12, "HEAD-X");
+        this.layout.put(13, new ItemBuilder(Material.DIAMOND_HELMET,"§b§lHead: Y","", "§7Current: §f"+radiansToDegreesRounded(armorStand.getHeadPose().getY()),"","§aClick to change!").build());
+        this.actionSlots.put(13, "HEAD-Y");
+        this.layout.put(14, new ItemBuilder(Material.DIAMOND_HELMET,"§b§lHead: Z","", "§7Current: §f"+radiansToDegreesRounded(armorStand.getHeadPose().getZ()),"","§aClick to change!").build());
+        this.actionSlots.put(14, "HEAD-Z");
     }
 
     @Override
@@ -124,6 +140,8 @@ public class PoseMenuPositions extends GUI {
 
         if (!actionSlots.containsKey(slot)) return;
         String action = actionSlots.get(slot);
+
+        this.playClickSound();
 
         switch (action) {
 
@@ -138,12 +156,12 @@ public class PoseMenuPositions extends GUI {
                 break;
 
             case "ROTATE":
-                player.sendMessage("§aWrite the rotation you wish the ArmorStand to have!");
-                player.sendMessage("§aExample rotation: '180'");
+
                 player.closeInventory();
+                PoseMaster.sendMessage(player,"§fWrite the desired rotation.");
+                PoseMaster.sendMessage(player,"§fMust be between §70 - 360 degrees§f.");
 
                 new PoseAwaitResponse(player, 600L) {
-
                     @Override
                     public void onRespond(String message) {
 
@@ -151,8 +169,7 @@ public class PoseMenuPositions extends GUI {
                         try {
                             value = Double.parseDouble(message);
                         } catch (NumberFormatException exception) {
-                            player.sendMessage("§cThe rotation '"+message+"' is invalid!");
-                            player.sendMessage("§cExample rotation: '180'");
+                            PoseMaster.sendMessage(player,"§4"+message+" §cis an invalid rotation!");
                             return;
                         }
 
@@ -160,12 +177,12 @@ public class PoseMenuPositions extends GUI {
                         newLoc.setYaw((float) value);
                         armorStand.teleport(newLoc);
 
-                        player.sendMessage("§aSuccessfully updated the Armorstand!");
+                        PoseMaster.sendMessage(player,"§aChanged the rotation to §2"+value+"§a!");
                     }
 
                     @Override
                     public void onTimeout() {
-                        player.sendMessage("§cYou took too long to respond. Open the menu to try again!");
+                        PoseMaster.sendMessage(player,"§cYou took too long to respond!");
                     }
                 };
 
@@ -174,9 +191,10 @@ public class PoseMenuPositions extends GUI {
             //Move the ArmorStand
             case "MOVE":
 
-                player.sendMessage("§aWrite the offset you wish the ArmorStand to go!");
-                player.sendMessage("§aExample offset: '2 1 0.2'");
                 player.closeInventory();
+                PoseMaster.sendMessage(player,"§7Write the offset you wish it to move!");
+                PoseMaster.sendMessage(player,"§7If you want it to move up by 2 blocks,");
+                PoseMaster.sendMessage(player,"§7then type §f0 2 0§7.");
 
                 new PoseAwaitResponse(player, 600L) {
 
@@ -186,8 +204,7 @@ public class PoseMenuPositions extends GUI {
 
                         //Invalid input
                         if (vector == null) {
-                            player.sendMessage("§cThe location offset '"+message+"' is invalid!");
-                            player.sendMessage("§cExample offset: '2 1 0.2'");
+                            PoseMaster.sendMessage(player,"§4"+message+"§c is an invalid offset!");
                             return;
                         }
 
@@ -195,21 +212,22 @@ public class PoseMenuPositions extends GUI {
                         Location newLocation = armorStand.getLocation().clone().add(vector);
                         armorStand.teleport(newLocation);
 
-                        player.sendMessage("§aSuccessfully updated the Armorstand!");
+                        PoseMaster.sendMessage(player,"§aThe armorstand has been moved!");
                     }
 
                     @Override
                     public void onTimeout() {
-                        player.sendMessage("§cYou took too long to respond. Open the menu to try again!");
+                        PoseMaster.sendMessage(player,"§cYou took too long to respond!");
                     }
 
                 };
                 break;
 
+                //Change
             default:
 
-                player.sendMessage("§aWrite the offset you wish the ArmorStand to move!");
-                player.sendMessage("§aExample offset: '5.43'");
+                PoseMaster.sendMessage(player,"§fWrite the desired pose.");
+                PoseMaster.sendMessage(player,"§fMust be between §70 - 360 degrees§f.");
                 player.closeInventory();
 
                 String[] actionSplit = action.split("-");
@@ -224,22 +242,49 @@ public class PoseMenuPositions extends GUI {
                         try {
                             value = Double.parseDouble(message);
                         } catch (NumberFormatException exception) {
-                            player.sendMessage("§cThe offset '"+message+"' is invalid!");
-                            player.sendMessage("§cExample offset: '180'");
+                            PoseMaster.sendMessage(player,"§4"+message+" §cis an invalid rotation!");
                             return;
                         }
 
                         //Move
                         changePoseValue(pose,coord,degreesToRadians(value));
-                        player.sendMessage("§aSuccessfully updated the Armorstand!");
+                        PoseMaster.sendMessage(player,"§aChanged the pose to §2"+value+"§a!");
                     }
 
                     @Override
                     public void onTimeout() {
-                        player.sendMessage("§cYou took too long to respond. Open the menu to try again!");
+                        PoseMaster.sendMessage(player,"§cYou took too long to respond!");
                     }
                 };
 
+                break;
+
+            case "DUPLICATE":
+
+                PoseMaster.sendMessage(player,"§aThe ArmorStand has been duplicated!");
+                player.closeInventory();
+
+                Location newLocation = armorStand.getLocation().clone().add(0,5,0);
+                ArmorStand newArmorstand = armorStand.getWorld().spawn(newLocation, ArmorStand.class);
+
+                //Equipment
+                newArmorstand.getEquipment().setArmorContents(armorStand.getEquipment().getArmorContents());
+                newArmorstand.getEquipment().setItemInHand(armorStand.getItemInHand());
+                //Basic values
+                newArmorstand.setVisible(armorStand.isVisible());
+                newArmorstand.setSmall(armorStand.isSmall());
+                newArmorstand.setArms(armorStand.hasArms());
+                newArmorstand.setBasePlate(armorStand.hasBasePlate());
+                if (armorStand.getCustomName() != null)
+                    newArmorstand.setCustomName(armorStand.getCustomName());
+                newArmorstand.setCustomNameVisible(armorStand.isCustomNameVisible());
+                //Poses
+                newArmorstand.setBodyPose(armorStand.getBodyPose());
+                newArmorstand.setLeftArmPose(armorStand.getLeftArmPose());
+                newArmorstand.setRightArmPose(armorStand.getRightArmPose());
+                newArmorstand.setLeftLegPose(armorStand.getLeftLegPose());
+                newArmorstand.setRightLegPose(armorStand.getRightLegPose());
+                newArmorstand.setHeadPose(armorStand.getHeadPose());
                 break;
 
         }

@@ -3,7 +3,6 @@ package doodieman.posemaster.gui;
 import doodieman.posemaster.PoseMaster;
 import doodieman.posemaster.utils.GUI;
 import doodieman.posemaster.utils.ItemBuilder;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
@@ -59,11 +58,11 @@ public class PoseMenuEquipment extends GUI {
             this.layout.put(i,new ItemBuilder(Material.STAINED_GLASS_PANE, "").setDurability((short) 7).build());
         }
 
-        this.layout.put(11,new ItemBuilder(Material.IRON_HELMET,"§6§lHelmet","", "§fPlace the helmet of the", "§fArmorStand below.").build());
-        this.layout.put(12,new ItemBuilder(Material.IRON_CHESTPLATE,"§6§lChestplate","", "§fPlace the chestplate of the", "§fArmorStand below.").build());
-        this.layout.put(13,new ItemBuilder(Material.IRON_LEGGINGS,"§6§lLeggings","", "§fPlace the leggings of the", "§fArmorStand below.").build());
-        this.layout.put(14,new ItemBuilder(Material.IRON_BOOTS,"§6§lBoots","", "§fPlace the boots of the", "§fArmorStand below.").build());
-        this.layout.put(15,new ItemBuilder(Material.IRON_SWORD,"§6§lTool","", "§fPlace the tool of the", "§fArmorStand below.").build());
+        this.layout.put(11,new ItemBuilder(Material.IRON_HELMET,"§f§lHelmet","", "§fPlace the helmet of the", "§fArmorStand below.").build());
+        this.layout.put(12,new ItemBuilder(Material.IRON_CHESTPLATE,"§f§lChestplate","", "§fPlace the chestplate of the", "§fArmorStand below.").build());
+        this.layout.put(13,new ItemBuilder(Material.IRON_LEGGINGS,"§f§lLeggings","", "§fPlace the leggings of the", "§fArmorStand below.").build());
+        this.layout.put(14,new ItemBuilder(Material.IRON_BOOTS,"§f§lBoots","", "§fPlace the boots of the", "§fArmorStand below.").build());
+        this.layout.put(15,new ItemBuilder(Material.IRON_SWORD,"§f§lTool","", "§fPlace the tool of the", "§fArmorStand below.").build());
 
         super.render();
 
@@ -81,6 +80,8 @@ public class PoseMenuEquipment extends GUI {
 
         if (!actionSlots.containsKey(slot)) return;
         String action = actionSlots.get(slot);
+
+        this.playClickSound();
 
         switch (action) {
             case "PAGE-EQUIPMENT":
