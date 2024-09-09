@@ -1,11 +1,9 @@
 package org.doodieman.posemaster.objects;
 
 import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.ArmorStand;
 import org.doodieman.posemaster.PoseMaster;
-import org.doodieman.posemaster.util.PoseMasterUtil;
 import org.doodieman.posemaster.util.StringUtil;
 
 import java.util.UUID;
@@ -82,7 +80,7 @@ public class PoseArmorStand {
 
     //Apply the default properties to the ArmorStand
     public void applyDefaultProperties() {
-        ArmorStandProperties properties = PoseMaster.getInstance().getDefaultProperties();
+        ArmorStandProperties properties =ArmorStandProperties.fromDefault();
         this.applyProperties(properties);
     }
 

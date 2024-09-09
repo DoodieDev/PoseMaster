@@ -2,8 +2,10 @@ package org.doodieman.posemaster.objects;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.util.EulerAngle;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,39 +14,161 @@ import java.util.Map;
 @Setter
 public class ArmorStandProperties {
 
-    private Map<String, Object> properties = new HashMap<>();
+    private Map<ArmorStandProperty, Object> properties = new HashMap<>();
 
-    //Write the properties to a ConfigurationSection
+    // Write the properties to a ConfigurationSection
     public void writeToConfigSection(ConfigurationSection section) {
-        for (Map.Entry<String, Object> entry : properties.entrySet())
-            section.set(entry.getKey(), entry.getValue());
+        for (Map.Entry<ArmorStandProperty, Object> entry : properties.entrySet()) {
+            section.set(entry.getKey().toString(), entry.getValue());
+        }
     }
-    //Load the properties from a section
+
+    // Load the properties from a ConfigurationSection
     public static ArmorStandProperties fromConfigSection(ConfigurationSection section) {
-        ArmorStandProperties properties = new ArmorStandProperties();
+        ArmorStandProperties armorStandProperties = new ArmorStandProperties();
 
-        for (String key : section.getKeys(false))
-            properties.getProperties().put(key, section.get(key));
+        for (ArmorStandProperty property : ArmorStandProperty.values()) {
+            Object value = section.get(property.toString());
 
-        return properties;
+            if (property.getType().isInstance(value)) {
+                armorStandProperties.getProperties().put(property, value);
+            }
+            else {
+                armorStandProperties.getProperties().put(property, property.getDefaultValue());
+            }
+        }
+
+        return armorStandProperties;
     }
 
+    //Get all the default properties from the enum
+    public static ArmorStandProperties fromDefault() {
+        ArmorStandProperties armorStandProperties = new ArmorStandProperties();
 
-    //Apply properties to an ArmorStand
+        for (ArmorStandProperty property : ArmorStandProperty.values()) {
+            armorStandProperties.getProperties().put(property, property.getDefaultValue());
+        }
+
+        return armorStandProperties;
+    }
+
+    // Apply properties to an ArmorStand
     public void applyToArmorStand(ArmorStand armorStand) {
-        armorStand.setVisible((boolean) properties.getOrDefault("visible", armorStand.isVisible()));
-        armorStand.setArms((boolean) properties.getOrDefault("arms", armorStand.hasArms()));
-        armorStand.setSmall((boolean) properties.getOrDefault("small", armorStand.isSmall()));
+        for (Map.Entry<ArmorStandProperty, Object> entry : properties.entrySet()) {
+            ArmorStandProperty property = entry.getKey();
+            Object value = entry.getValue();
+
+            if (value == null) continue;
+
+            switch (property) {
+                //Booleans
+                case VISIBLE:
+                    armorStand.setVisible((Boolean) value);
+                    break;
+                case SMALL:
+                    armorStand.setSmall((Boolean) value);
+                    break;
+                case ARMS:
+                    armorStand.setArms((Boolean) value);
+                    break;
+                case BASE_PLATE:
+                    armorStand.setBasePlate((Boolean) value);
+                    break;
+                case CUSTOM_NAME_VISIBLE:
+                    armorStand.setCustomNameVisible((Boolean) value);
+                    break;
+
+                //EulerAngles
+                case HEAD_POSE:
+                    armorStand.setHeadPose((EulerAngle) value);
+                    break;
+                case BODY_POSE:
+                    armorStand.setBodyPose((EulerAngle) value);
+                    break;
+                case LEFT_ARM_POSE:
+                    armorStand.setLeftArmPose((EulerAngle) value);
+                    break;
+                case RIGHT_ARM_POSE:
+                    armorStand.setRightArmPose((EulerAngle) value);
+                    break;
+                case LEFT_LEG_POSE:
+                    armorStand.setLeftLegPose((EulerAngle) value);
+                    break;
+                case RIGHT_LEG_POSE:
+                    armorStand.setRightLegPose((EulerAngle) value);
+                    break;
+
+                //Other
+                case ROTATION:
+                    float rotation = (float) value;
+                    Location newLocation = armorStand.getLocation();
+                    newLocation.setYaw(rotation);
+                    armorStand.teleport(newLocation);
+                    break;
+                case CUSTOM_NAME:
+                    armorStand.setCustomName((String) value);
+                    break;
+            }
+        }
     }
 
-    //Get the properties from an ArmorStand
+    // Get the properties from an ArmorStand
     public static ArmorStandProperties fromArmorStand(ArmorStand armorStand) {
-        ArmorStandProperties properties = new ArmorStandProperties();
+        ArmorStandProperties armorStandProperties = new ArmorStandProperties();
 
-        properties.getProperties().put("visible", armorStand.isVisible());
-        properties.getProperties().put("arms", armorStand.hasArms());
-        properties.getProperties().put("small", armorStand.isSmall());
+        for (ArmorStandProperty property : ArmorStandProperty.values()) {
+            switch (property) {
+                //Booleans
+                case VISIBLE:
+                    armorStandProperties.getProperties().put(property, armorStand.isVisible());
+                    break;
+                case SMALL:
+                    armorStandProperties.getProperties().put(property, armorStand.isSmall());
+                    break;
+                case ARMS:
+                    armorStandProperties.getProperties().put(property, armorStand.hasArms());
+                    break;
+                case BASE_PLATE:
+                    armorStandProperties.getProperties().put(property, armorStand.hasBasePlate());
+                    break;
+                case CUSTOM_NAME_VISIBLE:
+                    armorStandProperties.getProperties().put(property, armorStand.isCustomNameVisible());
+                    break;
 
-        return properties;
+                // EulerAngles
+                case HEAD_POSE:
+                    armorStandProperties.getProperties().put(property, armorStand.getHeadPose());
+                    break;
+                case BODY_POSE:
+                    armorStandProperties.getProperties().put(property, armorStand.getBodyPose());
+                    break;
+                case LEFT_ARM_POSE:
+                    armorStandProperties.getProperties().put(property, armorStand.getLeftArmPose());
+                    break;
+                case RIGHT_ARM_POSE:
+                    armorStandProperties.getProperties().put(property, armorStand.getRightArmPose());
+                    break;
+                case LEFT_LEG_POSE:
+                    armorStandProperties.getProperties().put(property, armorStand.getLeftLegPose());
+                    break;
+                case RIGHT_LEG_POSE:
+                    armorStandProperties.getProperties().put(property, armorStand.getRightLegPose());
+                    break;
+
+                // Other
+                case ROTATION:
+                    float rotation = armorStand.getLocation().getYaw();
+                    armorStandProperties.getProperties().put(property, rotation);
+                    break;
+                case CUSTOM_NAME:
+                    String name = armorStand.getCustomName();
+                    if (name == null) break;
+                    armorStandProperties.getProperties().put(property, name);
+                    break;
+            }
+        }
+
+        return armorStandProperties;
     }
+
 }
