@@ -1,13 +1,5 @@
-# Automatically cache ArmorStands in PoseMaster on creation or interaction.
-# If disabled it will generate a new ArmorStand ID every interaction.
+# Automatically cache ArmorStands in memory on any interaction
 auto-cache: true
 
-
-# Whether to use the default properties when a new ArmorStand is placed
+# Automatically apply default ArmorStand properties on creation.
 use-default-properties: true
-
-# The default properties when a new ArmorStand is placed
-default-properties:
-  visible: true
-  arms: true
-  small: false

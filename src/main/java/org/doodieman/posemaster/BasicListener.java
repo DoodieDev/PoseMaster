@@ -1,7 +1,6 @@
 package org.doodieman.posemaster;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
@@ -28,10 +27,11 @@ public class BasicListener implements Listener {
             return;
 
         ArmorStand armorStand = (ArmorStand) event.getEntity();
-
-        //Convert the armor stand to a PoseArmorStand object
         PoseArmorStand poseArmorStand = PoseMasterUtil.convertToPoseArmorStand(armorStand);
-        poseArmorStand.applyDefaultProperties();
+
+        if (ConfigOption.USE_DEFAULT_PROPERTIES.getBoolean()) {
+            poseArmorStand.applyDefaultProperties();
+        }
     }
 
     @EventHandler
