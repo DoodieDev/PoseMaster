@@ -1,10 +1,5 @@
 name: PoseMaster
-version: '${project.version}'
-main: doodieman.posemaster.PoseMaster
-authors: [DoodieMan]
-description: The plugin to change armorstand positions to your liking!
-commands:
-  posemaster:
-    aliases: [posem, pose, pmaster]
-    permission: "posemaster.admin"
-    permission-message: "§cYou do not have access to this command!"
+version: '2.0'
+main: org.doodieman.poseMaster.PoseMaster
+api-version: '1.21'
+authors: [ DoodieMan ]
