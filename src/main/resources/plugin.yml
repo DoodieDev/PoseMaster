@@ -1,5 +1,5 @@
 name: PoseMaster
 version: '2.0'
-main: org.doodieman.poseMaster.PoseMaster
+main: org.doodieman.posemaster.PoseMaster
 api-version: '1.21'
 authors: [ DoodieMan ]
