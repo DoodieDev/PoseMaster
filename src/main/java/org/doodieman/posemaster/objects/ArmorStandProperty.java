@@ -11,6 +11,7 @@ public enum ArmorStandProperty {
     ARMS(Boolean.class, true),
     BASE_PLATE(Boolean.class, true),
     CUSTOM_NAME_VISIBLE(Boolean.class, false),
+    INVULNERABLE(Boolean.class, true),
 
     //EulerAngles
     HEAD_POSE(EulerAngle.class, new EulerAngle(0, 0, 0)),

@@ -77,6 +77,9 @@ public class ArmorStandProperties {
                 case CUSTOM_NAME_VISIBLE:
                     armorStand.setCustomNameVisible((Boolean) value);
                     break;
+                case INVULNERABLE:
+                    armorStand.setInvulnerable((Boolean) value);
+                    break;
 
                 //EulerAngles
                 case HEAD_POSE:
@@ -133,6 +136,9 @@ public class ArmorStandProperties {
                     break;
                 case CUSTOM_NAME_VISIBLE:
                     armorStandProperties.getProperties().put(property, armorStand.isCustomNameVisible());
+                    break;
+                case INVULNERABLE:
+                    armorStandProperties.getProperties().put(property, armorStand.isInvulnerable());
                     break;
 
                 // EulerAngles

@@ -10,6 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.doodieman.posemaster.menu.pages.PageHome;
 import org.doodieman.posemaster.objects.PoseArmorStand;
 import org.doodieman.posemaster.util.PoseMasterUtil;
 
@@ -39,6 +40,7 @@ public class BasicListener implements Listener {
         if (event.getRightClicked().getType() != EntityType.ARMOR_STAND)
             return;
 
+        Player player = event.getPlayer();
         ArmorStand armorStand = (ArmorStand) event.getRightClicked();
         PoseArmorStand poseArmorStand = PoseMasterUtil.getFromCache(armorStand);
 
@@ -47,7 +49,9 @@ public class BasicListener implements Listener {
             poseArmorStand = PoseMasterUtil.convertToPoseArmorStand(armorStand);
         }
 
-        // TODO: Open menu
+        //Open the editor menu
+        event.setCancelled(true);
+        new PageHome(player, poseArmorStand).open();
     }
 
     @EventHandler
