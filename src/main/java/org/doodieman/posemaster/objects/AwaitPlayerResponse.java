@@ -11,6 +11,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 import org.doodieman.posemaster.PoseMaster;
+import org.doodieman.posemaster.config.lang.LangConfig;
 import org.doodieman.posemaster.util.StringUtil;
 
 import java.util.HashMap;
@@ -53,19 +54,38 @@ public class AwaitPlayerResponse implements Listener {
         switch (this.responseType) {
 
             case STRING -> this.onStringResponse(message);
+
             case DOUBLE -> {
                 double value;
                 try {
                     value = Double.parseDouble(message);
                     this.onDoubleResponse(value);
+
                 } catch (NumberFormatException exception) {
-                    player.sendMessage("§cInvalid number!");
+
+                    //Send error message
+                    Map<String, String> placeholders = Map.of(
+                            "%response%", message,
+                            "%type%", "number"
+                    );
+                    String langMessage = LangConfig.RESPONSE_TYPE_INVALID.getColoredMessage(placeholders);
+                    player.sendMessage(langMessage);
+
                 }
             }
+
             case VECTOR -> {
                 Vector vector = StringUtil.stringToVector(message);
                 if (vector == null) {
-                    player.sendMessage("§cInvalid vector!");
+
+                    //Send error message
+                    Map<String, String> placeholders = Map.of(
+                            "%response%", message,
+                            "%type%", "vector"
+                    );
+                    String langMessage = LangConfig.RESPONSE_TYPE_INVALID.getColoredMessage(placeholders);
+                    player.sendMessage(langMessage);
+
                     return;
                 }
                 this.onVectorResponse(vector);

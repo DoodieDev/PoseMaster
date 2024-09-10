@@ -1,8 +1,9 @@
-package org.doodieman.posemaster;
+package org.doodieman.posemaster.config;
 
 import org.bukkit.configuration.file.FileConfiguration;
+import org.doodieman.posemaster.PoseMaster;
 
-public enum ConfigOption {
+public enum NormalConfig {
 
     AUTO_CACHE("auto-cache", true),
     USE_DEFAULT_PROPERTIES("use-default-properties", true);
@@ -10,7 +11,7 @@ public enum ConfigOption {
     final String path;
     final Object defaultValue;
 
-    ConfigOption(String path, Object defaultValue) {
+    NormalConfig(String path, Object defaultValue) {
         this.path = path;
         this.defaultValue = defaultValue;
     }

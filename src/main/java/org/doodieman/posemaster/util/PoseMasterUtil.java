@@ -4,7 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.ArmorStand;
-import org.doodieman.posemaster.ConfigOption;
+import org.doodieman.posemaster.config.NormalConfig;
 import org.doodieman.posemaster.PoseMaster;
 import org.doodieman.posemaster.objects.armorstands.PoseArmorStand;
 
@@ -19,7 +19,7 @@ public class PoseMasterUtil {
 
     //Spawn a new ArmorStand with default data (poses, etc.)
     public static PoseArmorStand createPoseArmorStand(Location location) {
-        return createPoseArmorStand(location, ConfigOption.AUTO_CACHE.getBoolean());
+        return createPoseArmorStand(location, NormalConfig.AUTO_CACHE.getBoolean());
     }
     public static PoseArmorStand createPoseArmorStand(Location location, boolean saveToCache) {
         World world = location.getWorld();
@@ -28,7 +28,7 @@ public class PoseMasterUtil {
         ArmorStand armorStand = world.spawn(location, ArmorStand.class);
         PoseArmorStand poseArmorStand = new PoseArmorStand(armorStand);
 
-        if (ConfigOption.USE_DEFAULT_PROPERTIES.getBoolean())
+        if (NormalConfig.USE_DEFAULT_PROPERTIES.getBoolean())
             poseArmorStand.applyDefaultProperties();
 
         if (saveToCache)
@@ -39,7 +39,7 @@ public class PoseMasterUtil {
 
     //Convert an existing ArmorStand to a PoseArmorStand
     public static PoseArmorStand convertToPoseArmorStand(ArmorStand armorStand) {
-        return convertToPoseArmorStand(armorStand, ConfigOption.AUTO_CACHE.getBoolean());
+        return convertToPoseArmorStand(armorStand, NormalConfig.AUTO_CACHE.getBoolean());
     }
     public static PoseArmorStand convertToPoseArmorStand(ArmorStand armorStand, boolean saveToCache) {
         PoseArmorStand poseArmorStand = new PoseArmorStand(armorStand);

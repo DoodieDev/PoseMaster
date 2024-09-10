@@ -8,6 +8,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
+import org.doodieman.posemaster.config.lang.LangConfig;
 import org.doodieman.posemaster.menu.CoreMenu;
 import org.doodieman.posemaster.objects.AwaitPlayerResponse;
 import org.doodieman.posemaster.objects.AwaitResponseType;
@@ -15,6 +16,8 @@ import org.doodieman.posemaster.objects.armorstands.PoseArmorStand;
 import org.doodieman.posemaster.util.ItemBuilder;
 import org.doodieman.posemaster.util.MathUtil;
 import org.doodieman.posemaster.util.StringUtil;
+
+import java.util.Map;
 
 public class PagePositions extends CoreMenu {
 
@@ -96,17 +99,23 @@ public class PagePositions extends CoreMenu {
 
             //Move the ArmorStand by an offset
             case "MOVE" -> {
-                player.sendMessage("§aWrite the offset, example: 0 2 0");
+
+                //Lang message
+                String langMessage = LangConfig.TYPE_MOVE_OFFSET.getColoredMessage();
+                player.sendMessage(langMessage);
 
                 new AwaitPlayerResponse(player, AwaitResponseType.VECTOR) {
 
                     @Override
                     public void onVectorResponse(Vector vector) {
-                        player.sendMessage("§aMoved the armorstand!");
-
+                        //Move
                         Location location = armorStand.getLocation().clone();
                         location.add(vector);
                         armorStand.teleport(location);
+
+                        //Lang message - Success
+                        String langMessage = LangConfig.MOVE_SUCCESS.getColoredMessage();
+                        player.sendMessage(langMessage);
                     }
 
                 }.start();
@@ -114,19 +123,24 @@ public class PagePositions extends CoreMenu {
 
             //Teleport the ArmorStand to specific coordinates
             case "TELEPORT" -> {
-                player.sendMessage("§aWrite the location, example: 0 2 0");
+                //Lang message
+                String langMessage = LangConfig.TYPE_TELEPORT_LOCATION.getColoredMessage();
+                player.sendMessage(langMessage);
 
                 new AwaitPlayerResponse(player, AwaitResponseType.VECTOR) {
 
                     @Override
                     public void onVectorResponse(Vector vector) {
-                        player.sendMessage("§aTeleported the armorstand!");
-
+                        //Teleport
                         Location location = armorStand.getLocation().clone();
                         location.setX(vector.getX());
                         location.setY(vector.getY());
                         location.setZ(vector.getZ());
                         armorStand.teleport(location);
+
+                        //Lang message - success
+                        String langMessage = LangConfig.TELEPORT_SUCCESS.getColoredMessage();
+                        player.sendMessage(langMessage);
                     }
 
                 }.start();
@@ -134,17 +148,25 @@ public class PagePositions extends CoreMenu {
 
             //Rotate the ArmorStand (changes the Yaw)
             case "ROTATE" -> {
-                player.sendMessage("§aWrite the desired rotation 0-360 degrees");
+                //Lang message
+                String langMessage = LangConfig.TYPE_ROTATION.getColoredMessage();
+                player.sendMessage(langMessage);
 
                 new AwaitPlayerResponse(player, AwaitResponseType.DOUBLE) {
 
                     @Override
                     public void onDoubleResponse(Double degrees) {
-                        player.sendMessage("§aChanged the rotation to "+degrees);
-
+                        //Rotate
                         Location location = armorStand.getLocation().clone();
                         location.setYaw(degrees.floatValue());
                         armorStand.teleport(location);
+
+                        //Lang message - success
+                        Map<String, String> placeholders = Map.of(
+                                "%degrees%", degrees.toString()
+                        );
+                        String langMessage = LangConfig.ROTATION_SUCCESS.getColoredMessage(placeholders);
+                        player.sendMessage(langMessage);
                     }
 
                 }.start();
@@ -153,7 +175,9 @@ public class PagePositions extends CoreMenu {
             //Change a pose (arms, body, etc..)
             default -> {
 
-                player.sendMessage("§aWrite the desired pose 0-360 degrees");
+                //Lang message
+                String langMessage = LangConfig.TYPE_ANGLE.getColoredMessage();
+                player.sendMessage(langMessage);
 
                 String[] actionSplit = action.split("-");
                 String type = actionSplit[0];
@@ -163,8 +187,15 @@ public class PagePositions extends CoreMenu {
 
                     @Override
                     public void onDoubleResponse(Double degrees) {
-                        player.sendMessage("§aChanged the pose to "+degrees);
+                        //Change angle
                         changePoseValue(type, coordinate, degrees);
+
+                        //Lang message - success
+                        Map<String, String> placeholders = Map.of(
+                                "%degrees%", degrees.toString()
+                        );
+                        String langMessage = LangConfig.ANGLE_SUCCESS.getColoredMessage(placeholders);
+                        player.sendMessage(langMessage);
                     }
 
                 }.start();

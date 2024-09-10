@@ -10,6 +10,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.doodieman.posemaster.config.NormalConfig;
+import org.doodieman.posemaster.config.lang.LangConfig;
 import org.doodieman.posemaster.menu.pages.PageHome;
 import org.doodieman.posemaster.objects.armorstands.PoseArmorStand;
 import org.doodieman.posemaster.util.PoseMasterUtil;
@@ -30,7 +32,7 @@ public class BasicListener implements Listener {
         ArmorStand armorStand = (ArmorStand) event.getEntity();
         PoseArmorStand poseArmorStand = PoseMasterUtil.convertToPoseArmorStand(armorStand);
 
-        if (ConfigOption.USE_DEFAULT_PROPERTIES.getBoolean()) {
+        if (NormalConfig.USE_DEFAULT_PROPERTIES.getBoolean()) {
             poseArmorStand.applyDefaultProperties();
         }
     }
@@ -71,7 +73,8 @@ public class BasicListener implements Listener {
         event.setCancelled(true);
 
         if (player.getInventory().getItemInMainHand().getType() != Material.POISONOUS_POTATO) {
-            player.sendMessage("§cYou can only break this with a poisonous potato!");
+            //Lang
+            player.sendMessage(LangConfig.CANNOT_DESTROY.getColoredMessage());
             return;
         }
 
