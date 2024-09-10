@@ -11,7 +11,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.doodieman.posemaster.menu.pages.PageHome;
-import org.doodieman.posemaster.objects.PoseArmorStand;
+import org.doodieman.posemaster.objects.armorstands.PoseArmorStand;
 import org.doodieman.posemaster.util.PoseMasterUtil;
 
 public class BasicListener implements Listener {

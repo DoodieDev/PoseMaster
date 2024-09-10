@@ -1,18 +1,16 @@
 package org.doodieman.posemaster.menu;
 
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.doodieman.posemaster.menu.pages.PageEquipment;
 import org.doodieman.posemaster.menu.pages.PageHome;
 import org.doodieman.posemaster.menu.pages.PagePositions;
 import org.doodieman.posemaster.menu.pages.PageProperties;
-import org.doodieman.posemaster.objects.PoseArmorStand;
+import org.doodieman.posemaster.objects.armorstands.PoseArmorStand;
 import org.doodieman.posemaster.util.GUI;
 import org.doodieman.posemaster.util.ItemBuilder;
 
@@ -65,7 +63,7 @@ public class CoreMenu extends GUI {
                 .lore("&6- &fCool lore", "", "&aLeft-click to open")
                 .glow(this.type.equals("EQUIPMENT"))
                 .colorizeAll()
-                .addItemFlag(ItemFlag.HIDE_ATTRIBUTES)
+                .hideAttributes()
                 .build();
         this.registerAction("PAGE_EQUIPMENT", 41, pageEquipment);
         //Properties page item

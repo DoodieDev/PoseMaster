@@ -4,7 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.doodieman.posemaster.menu.CoreMenu;
-import org.doodieman.posemaster.objects.PoseArmorStand;
+import org.doodieman.posemaster.objects.armorstands.PoseArmorStand;
 
 public class PageHome extends CoreMenu {
 

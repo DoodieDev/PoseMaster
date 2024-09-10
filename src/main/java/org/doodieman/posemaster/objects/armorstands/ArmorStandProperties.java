@@ -1,4 +1,4 @@
-package org.doodieman.posemaster.objects;
+package org.doodieman.posemaster.objects.armorstands;
 
 import lombok.Getter;
 import lombok.Setter;

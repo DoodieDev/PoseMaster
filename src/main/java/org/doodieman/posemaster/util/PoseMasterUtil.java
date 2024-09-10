@@ -6,7 +6,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.ArmorStand;
 import org.doodieman.posemaster.ConfigOption;
 import org.doodieman.posemaster.PoseMaster;
-import org.doodieman.posemaster.objects.PoseArmorStand;
+import org.doodieman.posemaster.objects.armorstands.PoseArmorStand;
 
 import java.util.List;
 import java.util.UUID;

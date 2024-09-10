@@ -1,5 +1,7 @@
 package org.doodieman.posemaster.util;
 
+import com.google.common.collect.MultimapBuilder;
+import lombok.Getter;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -13,6 +15,7 @@ public class ItemBuilder {
 
     private final ItemStack itemStack;
 
+    @Getter
     private ItemMeta itemMeta;
 
     public ItemBuilder(ItemBuilder itemBuilder) {
@@ -219,6 +222,12 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder hideAttributes() {
+        this.itemMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        this.itemMeta.setAttributeModifiers(MultimapBuilder.hashKeys().hashSetValues().build());
+        return this;
+    }
+
     public ItemBuilder setLeatherArmorColor(Color color) {
         LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) this.itemMeta;
         if (Bukkit.getItemFactory().isApplicable(leatherArmorMeta, this.itemStack)) {
@@ -226,10 +235,6 @@ public class ItemBuilder {
             this.itemMeta = leatherArmorMeta;
         }
         return this;
-    }
-
-    public ItemMeta getItemMeta() {
-        return this.itemMeta;
     }
 
     public ItemStack build() {

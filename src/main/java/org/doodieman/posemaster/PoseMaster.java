@@ -2,8 +2,7 @@ package org.doodieman.posemaster;
 
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.doodieman.posemaster.objects.ArmorStandProperties;
-import org.doodieman.posemaster.objects.PoseArmorStand;
+import org.doodieman.posemaster.objects.armorstands.PoseArmorStand;
 
 import java.util.ArrayList;
 import java.util.List;
