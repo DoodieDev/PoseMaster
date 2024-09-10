@@ -78,7 +78,7 @@ public class CoreMenu extends GUI {
         super.render();
     }
 
-    public void onAction(String action) {}
+    public void onAction(String action, ClickType clickType) {}
 
     @Override
     public void click(int slot, ItemStack clickedItem, ClickType clickType, InventoryType inventoryType) {
@@ -108,7 +108,7 @@ public class CoreMenu extends GUI {
                 break;
 
             default:
-                this.onAction(action);
+                this.onAction(action, clickType);
                 break;
         }
 

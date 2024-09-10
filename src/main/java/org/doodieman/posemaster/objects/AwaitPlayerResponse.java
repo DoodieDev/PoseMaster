@@ -9,7 +9,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Vector;
 import org.doodieman.posemaster.PoseMaster;
+import org.doodieman.posemaster.util.StringUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +43,7 @@ public class AwaitPlayerResponse implements Listener {
 
     public void onStringResponse(String response) {}
     public void onDoubleResponse(Double response) {}
+    public void onVectorResponse(Vector response) {}
 
     public void onTimeout() {}
 
@@ -58,6 +61,14 @@ public class AwaitPlayerResponse implements Listener {
                 } catch (NumberFormatException exception) {
                     player.sendMessage("§cInvalid number!");
                 }
+            }
+            case VECTOR -> {
+                Vector vector = StringUtil.stringToVector(message);
+                if (vector == null) {
+                    player.sendMessage("§cInvalid vector!");
+                    return;
+                }
+                this.onVectorResponse(vector);
             }
 
         }

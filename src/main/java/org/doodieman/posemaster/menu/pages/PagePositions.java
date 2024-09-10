@@ -1,15 +1,20 @@
 package org.doodieman.posemaster.menu.pages;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.EulerAngle;
+import org.bukkit.util.Vector;
 import org.doodieman.posemaster.menu.CoreMenu;
 import org.doodieman.posemaster.objects.AwaitPlayerResponse;
 import org.doodieman.posemaster.objects.AwaitResponseType;
 import org.doodieman.posemaster.objects.armorstands.PoseArmorStand;
 import org.doodieman.posemaster.util.ItemBuilder;
 import org.doodieman.posemaster.util.MathUtil;
+import org.doodieman.posemaster.util.StringUtil;
 
 public class PagePositions extends CoreMenu {
 
@@ -20,6 +25,23 @@ public class PagePositions extends CoreMenu {
     @Override
     public void render() {
         ArmorStand armorStand = this.getPoseArmorStand().getArmorStand();
+
+        //Rotate
+        ItemStack rotateItem = new ItemBuilder(Material.COMPASS)
+                .name("&6Rotation")
+                .lore("", "&7Current: &f"+armorStand.getLocation().getYaw(), "", "&aLeft-click to change")
+                .colorizeAll()
+                .build();
+        this.registerAction("ROTATE", 1, rotateItem);
+
+        //Move
+        String formattedLocation = StringUtil.formatLocation(armorStand.getLocation(), 2, false);
+        ItemStack moveItem = new ItemBuilder(Material.ENDER_PEARL)
+                .name("&6Location")
+                .lore("", "&7Current: &f"+formattedLocation, "", "&aLeft-click to move", "&aMiddle-click to teleport")
+                .colorizeAll()
+                .build();
+        this.registerAction("MOVE", 7, moveItem);
 
         //Arms
         this.createPoseItems(9, Material.BONE, "LEFTARM", "Left Arm", armorStand.getLeftArmPose());
@@ -61,10 +83,72 @@ public class PagePositions extends CoreMenu {
     }
 
     @Override
-    public void onAction(String action) {
+    public void onAction(String action, ClickType clickType) {
+        ArmorStand armorStand = getPoseArmorStand().getArmorStand();
         player.closeInventory();
 
+        //Change to teleport if middle-clicked
+        if (action.equals("MOVE") && clickType == ClickType.MIDDLE) {
+            action = "TELEPORT";
+        }
+
         switch (action) {
+
+            //Move the ArmorStand by an offset
+            case "MOVE" -> {
+                player.sendMessage("§aWrite the offset, example: 0 2 0");
+
+                new AwaitPlayerResponse(player, AwaitResponseType.VECTOR) {
+
+                    @Override
+                    public void onVectorResponse(Vector vector) {
+                        player.sendMessage("§aMoved the armorstand!");
+
+                        Location location = armorStand.getLocation().clone();
+                        location.add(vector);
+                        armorStand.teleport(location);
+                    }
+
+                }.start();
+            }
+
+            //Teleport the ArmorStand to specific coordinates
+            case "TELEPORT" -> {
+                player.sendMessage("§aWrite the location, example: 0 2 0");
+
+                new AwaitPlayerResponse(player, AwaitResponseType.VECTOR) {
+
+                    @Override
+                    public void onVectorResponse(Vector vector) {
+                        player.sendMessage("§aTeleported the armorstand!");
+
+                        Location location = armorStand.getLocation().clone();
+                        location.setX(vector.getX());
+                        location.setY(vector.getY());
+                        location.setZ(vector.getZ());
+                        armorStand.teleport(location);
+                    }
+
+                }.start();
+            }
+
+            //Rotate the ArmorStand (changes the Yaw)
+            case "ROTATE" -> {
+                player.sendMessage("§aWrite the desired rotation 0-360 degrees");
+
+                new AwaitPlayerResponse(player, AwaitResponseType.DOUBLE) {
+
+                    @Override
+                    public void onDoubleResponse(Double degrees) {
+                        player.sendMessage("§aChanged the rotation to "+degrees);
+
+                        Location location = armorStand.getLocation().clone();
+                        location.setYaw(degrees.floatValue());
+                        armorStand.teleport(location);
+                    }
+
+                }.start();
+            }
 
             //Change a pose (arms, body, etc..)
             default -> {
