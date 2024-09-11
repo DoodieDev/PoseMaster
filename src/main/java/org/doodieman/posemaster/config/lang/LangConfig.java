@@ -13,8 +13,11 @@ public enum LangConfig {
 
     CANNOT_DESTROY("cannot-destroy", "%prefix% &cYou can't break this without a poisonous potato!"),
 
-    TYPE_MOVE_OFFSET("write-position", "%prefix% Type the offset you want it to move.\n%prefix% &7Example: &e0 2 0 &7(Moves up by 2 blocks)"),
+    TYPE_MOVE_OFFSET("type-move-offset", "%prefix% Type the offset you want it to move.\n%prefix% &7Example: &e0 2 0 &7(Moves up by 2 blocks)"),
+    TYPE_MOVE_DIRECTION("type-move-direction", "%prefix% Type how many blocks you want it to move.\n%prefix% &7Example: &e5 &7(Moves 5 blocks in facing direction)"),
+
     MOVE_SUCCESS("move-success", "%prefix% &aSuccessfully moved the ArmorStand!"),
+
     TYPE_TELEPORT_LOCATION("type-teleport-location", "%prefix% Type the coordinates you want it to teleport to.\n%prefix% &7Example: &e230 65 45 &7(Teleports to the coordinates)"),
     TELEPORT_SUCCESS("teleport-success", "%prefix% &aSuccessfully teleported the ArmorStand!"),
     TYPE_ROTATION("type-rotation", "%prefix% Type the new rotation within 0-360 degrees."),

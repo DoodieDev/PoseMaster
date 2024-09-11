@@ -52,7 +52,7 @@ public class CoreMenu extends GUI {
         //Positions page item
         ItemStack pagePositions = new ItemBuilder(Material.ARMOR_STAND)
                 .name("&6Positions")
-                .lore("&6- &fCool lore", "", "&aLeft-click to open")
+                .lore("&7Here you can modify the ArmorStand", "&7exactly as you wish.", "", "&aLeft-click to open")
                 .glow(this.type.equals("POSITIONS"))
                 .colorizeAll()
                 .build();

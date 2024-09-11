@@ -6,6 +6,7 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.BlockVector;
 import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
 import org.doodieman.posemaster.config.lang.LangConfig;
@@ -41,10 +42,17 @@ public class PagePositions extends CoreMenu {
         String formattedLocation = StringUtil.formatLocation(armorStand.getLocation(), 2, false);
         ItemStack moveItem = new ItemBuilder(Material.ENDER_PEARL)
                 .name("&6Location")
-                .lore("", "&7Current: &f"+formattedLocation, "", "&aLeft-click to move", "&aMiddle-click to teleport")
+                .lore(
+                        "",
+                        "&7Current: &f"+formattedLocation,
+                        "",
+                        "&aLeft-click to move it to a coordinate",
+                        "&aMiddle-click to move it an amount of blocks",
+                        "&aRight-click to move it in the direction you're facing"
+                )
                 .colorizeAll()
                 .build();
-        this.registerAction("MOVE", 7, moveItem);
+        this.registerAction("LOCATION", 7, moveItem);
 
         //Arms
         this.createPoseItems(9, Material.BONE, "LEFTARM", "Left Arm", armorStand.getLeftArmPose());
@@ -90,10 +98,13 @@ public class PagePositions extends CoreMenu {
         ArmorStand armorStand = getPoseArmorStand().getArmorStand();
         player.closeInventory();
 
-        //Change to teleport if middle-clicked
-        if (action.equals("MOVE") && clickType == ClickType.MIDDLE) {
+        //Change the LOCATION action according to ClickType
+        if (action.equals("LOCATION") && clickType == ClickType.LEFT)
             action = "TELEPORT";
-        }
+        else if (action.equals("LOCATION") && clickType == ClickType.RIGHT)
+            action = "MOVE-DIRECTION";
+        else if (action.equals("LOCATION") && clickType == ClickType.MIDDLE)
+            action = "MOVE";
 
         switch (action) {
 
@@ -111,6 +122,35 @@ public class PagePositions extends CoreMenu {
                         //Move
                         Location location = armorStand.getLocation().clone();
                         location.add(vector);
+                        armorStand.teleport(location);
+
+                        //Lang message - Success
+                        String langMessage = LangConfig.MOVE_SUCCESS.getColoredMessage();
+                        player.sendMessage(langMessage);
+                    }
+
+                }.start();
+            }
+
+            //Move the ArmorStand the direction player is facing
+            case "MOVE-DIRECTION" -> {
+                //Lang message
+                String langMessage = LangConfig.TYPE_MOVE_DIRECTION.getColoredMessage();
+                player.sendMessage(langMessage);
+
+                new AwaitPlayerResponse(player, AwaitResponseType.DOUBLE) {
+
+                    @Override
+                    public void onDoubleResponse(Double amount) {
+
+                        Vector direction = player.getLocation().getDirection();
+                        Location location = armorStand.getLocation().clone();
+
+                        direction.setX(Math.round(direction.getX()) * amount);
+                        direction.setY(Math.round(direction.getY()) * amount);
+                        direction.setZ(Math.round(direction.getZ()) * amount);
+
+                        location.add(direction);
                         armorStand.teleport(location);
 
                         //Lang message - Success
