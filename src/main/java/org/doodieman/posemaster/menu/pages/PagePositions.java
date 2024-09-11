@@ -23,7 +23,7 @@ import java.util.Map;
 public class PagePositions extends CoreMenu {
 
     public PagePositions(Player player, PoseArmorStand poseArmorStand) {
-        super(player,  "POSITIONS", poseArmorStand);
+        super(player,  "PAGE_POSITIONS", poseArmorStand);
     }
 
     @Override

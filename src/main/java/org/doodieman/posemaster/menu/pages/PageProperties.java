@@ -9,7 +9,8 @@ import org.doodieman.posemaster.objects.armorstands.PoseArmorStand;
 public class PageProperties extends CoreMenu {
 
     public PageProperties(Player player, PoseArmorStand poseArmorStand) {
-        super(player,  "PROPERTIES", poseArmorStand);
+        super(player,  "PAGE_PROPERTIES", poseArmorStand);
+
     }
 
     @Override

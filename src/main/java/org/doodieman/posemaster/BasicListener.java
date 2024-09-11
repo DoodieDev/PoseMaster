@@ -12,8 +12,10 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.doodieman.posemaster.config.NormalConfig;
 import org.doodieman.posemaster.config.lang.LangConfig;
+import org.doodieman.posemaster.menu.CoreMenu;
 import org.doodieman.posemaster.menu.pages.PageHome;
 import org.doodieman.posemaster.objects.armorstands.PoseArmorStand;
+import org.doodieman.posemaster.objects.players.PlayerCache;
 import org.doodieman.posemaster.util.PoseMasterUtil;
 
 public class BasicListener implements Listener {
@@ -51,9 +53,19 @@ public class BasicListener implements Listener {
             poseArmorStand = PoseMasterUtil.convertToPoseArmorStand(armorStand);
         }
 
-        //Open the editor menu
         event.setCancelled(true);
-        new PageHome(player, poseArmorStand).open();
+
+        //Open the last used page, if its cached
+        PlayerCache cache = PoseMaster.getInstance().getPlayerCache(player);
+        if (cache.getLastMenuPage() != null) {
+            String type = cache.getLastMenuPage();
+            new CoreMenu(player, "", poseArmorStand).changePage(type);
+        }
+        //No cached, open homepage
+        else {
+            new PageHome(player, poseArmorStand).open();
+        }
+
     }
 
     @EventHandler
