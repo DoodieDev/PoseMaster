@@ -80,6 +80,9 @@ public class ArmorStandProperties {
                 case INVULNERABLE:
                     armorStand.setInvulnerable((Boolean) value);
                     break;
+                case GRAVITY:
+                    armorStand.setGravity((Boolean) value);
+                    break;
 
                 //EulerAngles
                 case HEAD_POSE:
@@ -139,6 +142,9 @@ public class ArmorStandProperties {
                     break;
                 case INVULNERABLE:
                     armorStandProperties.getProperties().put(property, armorStand.isInvulnerable());
+                    break;
+                case GRAVITY:
+                    armorStandProperties.getProperties().put(property, armorStand.hasGravity());
                     break;
 
                 // EulerAngles
