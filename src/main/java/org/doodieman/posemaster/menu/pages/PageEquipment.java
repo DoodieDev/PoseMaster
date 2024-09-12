@@ -1,17 +1,43 @@
 package org.doodieman.posemaster.menu.pages;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.doodieman.posemaster.PoseMaster;
 import org.doodieman.posemaster.menu.CoreMenu;
 import org.doodieman.posemaster.objects.armorstands.PoseArmorStand;
+import org.doodieman.posemaster.objects.armorstands.PoseModifyEvent;
 import org.doodieman.posemaster.util.ItemBuilder;
 
-public class PageEquipment extends CoreMenu {
+import java.util.HashMap;
+import java.util.Map;
+
+public class PageEquipment extends CoreMenu implements Listener {
+
+    //Map of the equipment slots
+    final Map<Integer, EquipmentSlot> equipmentSlots = new HashMap<>();
 
     public PageEquipment(Player player, PoseArmorStand poseArmorStand) {
         super(player,  "PAGE_EQUIPMENT", poseArmorStand);
+
+        this.setAllowAirSlots(true);
+        equipmentSlots.put(19, EquipmentSlot.OFF_HAND);
+        equipmentSlots.put(20, EquipmentSlot.HAND);
+        equipmentSlots.put(22, EquipmentSlot.HEAD);
+        equipmentSlots.put(23, EquipmentSlot.CHEST);
+        equipmentSlots.put(24, EquipmentSlot.LEGS);
+        equipmentSlots.put(25, EquipmentSlot.FEET);
+
+        Bukkit.getPluginManager().registerEvents(this, PoseMaster.getInstance());
     }
 
     @Override
@@ -23,6 +49,8 @@ public class PageEquipment extends CoreMenu {
                 .name("")
                 .build();
         for (int i = 0; i < 36; i++) {
+            if (this.equipmentSlots.containsKey(i))
+                continue;
             this.layout.put(i, emptyGlass);
         }
 
@@ -53,33 +81,65 @@ public class PageEquipment extends CoreMenu {
                 .lore("&7Place an item below")
                 .hideAttributes().colorizeAll().build());
 
+        super.render();
+
         //Load the equipment from ArmorStand
         this.loadEquipment();
 
-        super.render();
     }
 
+    @Override
+    public void click(int slot, ItemStack clickedItem, ClickType clickType, InventoryType inventoryType) {
+        super.click(slot, clickedItem, clickType, inventoryType);
+
+        //What the hell am I even doing here
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                applyEquipment();
+            }
+        }.runTaskLater(PoseMaster.getInstance(), 1L);
+    }
+
+    @Override
+    public void closed() {
+        HandlerList.unregisterAll(this);
+        super.closed();
+    }
+
+    //When the ArmorStand is modified by another player, update
+    @EventHandler
+    public void onModify(PoseModifyEvent event) {
+        if (event.getPoseArmorStand() != this.getPoseArmorStand()) return;
+        if (event.getModifier().equals(this.player)) return;
+        this.loadEquipment();
+    }
+
+    //Load the ArmorStand equipment into the menu
     private void loadEquipment() {
         ArmorStand armorStand = this.getPoseArmorStand().getArmorStand();
         if (armorStand.getEquipment() == null) return;
-        //Offhand
-        ItemStack offhand = armorStand.getEquipment().getItemInOffHand();
-        this.layout.put(19, offhand);
-        //Main hand
-        ItemStack mainHand = armorStand.getEquipment().getItemInMainHand();
-        this.layout.put(20, mainHand);
-        //Helmet
-        ItemStack helmet = armorStand.getEquipment().getHelmet();
-        this.layout.put(22, helmet);
-        //Chestplate
-        ItemStack chestplate = armorStand.getEquipment().getChestplate();
-        this.layout.put(23, chestplate);
-        //Leggings
-        ItemStack leggings = armorStand.getEquipment().getLeggings();
-        this.layout.put(24, leggings);
-        //Boots
-        ItemStack boots = armorStand.getEquipment().getBoots();
-        this.layout.put(25, boots);
+
+        for (Map.Entry<Integer, EquipmentSlot> entry : this.equipmentSlots.entrySet()) {
+            ItemStack item = armorStand.getEquipment().getItem(entry.getValue());
+            this.getInventory().setItem(entry.getKey(), item);
+        }
     }
+
+    //Apply the equipment from the menu, to the ArmorStand
+    private void applyEquipment() {
+        ArmorStand armorStand = getPoseArmorStand().getArmorStand();
+        if (armorStand.getEquipment() == null) return;
+
+        for (Map.Entry<Integer, EquipmentSlot> entry : this.equipmentSlots.entrySet()) {
+            ItemStack item = this.getInventory().getItem(entry.getKey());
+            armorStand.getEquipment().setItem(entry.getValue(), item);
+        }
+
+        //Call event
+        PoseModifyEvent event = new PoseModifyEvent(this.getPoseArmorStand(), this.player);
+        Bukkit.getPluginManager().callEvent(event);
+    }
+
 
 }
