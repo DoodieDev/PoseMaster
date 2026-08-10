@@ -40,12 +40,15 @@ public class PoseListener implements Listener {
 
     /**
      * Marker armor stands have no hitbox (vanilla), so they can never be clicked
-     * or hit. This handler lets the potato remove the nearest marker stand
-     * within range by interacting in the air/on a block.
+     * or hit. This handler lets the potato edit the nearest marker stand within
+     * range by interacting in the air/on a block: right-click opens the menu,
+     * left-click removes the stand.
      */
     @EventHandler ( priority = EventPriority.HIGHEST )
     public void onMarkerPotatoInteract(PlayerInteractEvent event) {
-        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+        Action action = event.getAction();
+        if (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK
+            && action != Action.LEFT_CLICK_AIR && action != Action.LEFT_CLICK_BLOCK) return;
         Player player = event.getPlayer();
         if (player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR) return;
         if (!this.isHoldingTriggerItem(player)) return;
@@ -54,8 +57,13 @@ public class PoseListener implements Listener {
         if (nearestMarker == null) return;
 
         event.setCancelled(true);
-        nearestMarker.remove();
-        PoseMaster.sendMessage(player, "§7Removed the nearest §fmarker§7 armor stand.");
+
+        if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
+            new PoseMenuPositions(player, nearestMarker).open();
+        } else {
+            nearestMarker.remove();
+            PoseMaster.sendMessage(player, "§7Removed the nearest §fmarker§7 armor stand.");
+        }
     }
 
     @EventHandler ( priority = EventPriority.HIGHEST )

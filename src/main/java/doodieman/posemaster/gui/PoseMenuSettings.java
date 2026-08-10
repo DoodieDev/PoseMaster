@@ -78,7 +78,7 @@ public class PoseMenuSettings extends GUI {
         String currentMarker = armorStand.isMarker() ? "§aEnabled" : "§cDisabled";
         ItemBuilder marker = new ItemBuilder(MenuAssets.carpetMaterial())
             .name("§9§lMarker")
-            .lore("", "§7Current: " + currentMarker, "", "§aClick to toggle!", "", "§cWarning: marker stands have no", "§chitbox and cannot be clicked", "§cor hit anymore!", "§7Remove with the poisonous", "§7potato while standing nearby.");
+            .lore("", "§7Current: " + currentMarker, "", "§aClick to toggle!", "", "§cWarning: marker stands have no", "§chitbox and cannot be clicked", "§cor hit anymore!", "§7Right-click with the poisonous", "§7potato nearby to edit, left-click", "§7to remove.");
         if (armorStand.isMarker()) marker.makeGlowing();
 
         //Arms
