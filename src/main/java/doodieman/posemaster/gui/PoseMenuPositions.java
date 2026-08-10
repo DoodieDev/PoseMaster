@@ -82,12 +82,17 @@ public class PoseMenuPositions extends GUI {
         ItemBuilder settings = new ItemBuilder(Material.ANVIL)
             .name("§8§lSettings")
             .lore("", "§fThis page is for changing the", "§fsettings of the ArmorStand.", "", "§aClick to open!");
+        ItemBuilder presets = new ItemBuilder(Material.BOOK)
+            .name("§d§lPresets")
+            .lore("", "§fThis page is for saving and applying", "§fpresets to the ArmorStand.", "", "§aClick to open!");
 
         this.layout.put(39, position.build());
         this.layout.put(40, equipment.build());
         this.actionSlots.put(40, "PAGE-EQUIPMENT");
         this.layout.put(41, settings.build());
         this.actionSlots.put(41, "PAGE-SETTINGS");
+        this.layout.put(44, presets.build());
+        this.actionSlots.put(44, "PAGE-PRESETS");
     }
 
     public void createArmPoses() {
@@ -164,6 +169,10 @@ public class PoseMenuPositions extends GUI {
                 break;
             case "PAGE-POSITION":
                 new PoseMenuPositions(player, armorStand).open();
+                break;
+
+            case "PAGE-PRESETS":
+                new PoseMenuPresets(player, armorStand).open();
                 break;
 
             case "ROTATE":

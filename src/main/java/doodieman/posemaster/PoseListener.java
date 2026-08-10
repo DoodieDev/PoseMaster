@@ -3,6 +3,7 @@ package doodieman.posemaster;
 import doodieman.posemaster.compat.ArmorStandAccess;
 import doodieman.posemaster.gui.PoseMenuEquipment;
 import doodieman.posemaster.gui.PoseMenuPositions;
+import doodieman.posemaster.gui.PoseMenuPresets;
 import doodieman.posemaster.gui.PoseMenuSettings;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -99,6 +100,8 @@ public class PoseListener implements Listener {
             new PoseMenuSettings(player, armorStand).open();
         } else if ("EQUIPMENT".equals(lastPage)) {
             new PoseMenuEquipment(player, armorStand).open();
+        } else if ("PRESETS".equals(lastPage)) {
+            new PoseMenuPresets(player, armorStand).open();
         } else {
             new PoseMenuPositions(player, armorStand).open();
         }

@@ -50,12 +50,17 @@ public class PoseMenuSettings extends GUI {
             .name("§8§lSettings")
             .lore("", "§fThis page is for changing the", "§fsettings of the ArmorStand.", "", "§7§oCurrently selected!")
             .makeGlowing();
+        ItemBuilder presets = new ItemBuilder(Material.BOOK)
+            .name("§d§lPresets")
+            .lore("", "§fThis page is for saving and applying", "§fpresets to the ArmorStand.", "", "§aClick to open!");
 
         this.layout.put(39, position.build());
         this.actionSlots.put(39, "PAGE-POSITION");
         this.layout.put(40, equipment.build());
         this.actionSlots.put(40, "PAGE-EQUIPMENT");
         this.layout.put(41, settings.build());
+        this.layout.put(44, presets.build());
+        this.actionSlots.put(44, "PAGE-PRESETS");
     }
 
     @Override
@@ -258,6 +263,10 @@ public class PoseMenuSettings extends GUI {
                 break;
             case "PAGE-POSITION":
                 new PoseMenuPositions(player, armorStand).open();
+                break;
+
+            case "PAGE-PRESETS":
+                new PoseMenuPresets(player, armorStand).open();
                 break;
 
             case "SMALL":

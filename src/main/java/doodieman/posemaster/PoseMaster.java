@@ -3,6 +3,7 @@ package doodieman.posemaster;
 import doodieman.posemaster.command.PoseMasterCommand;
 import doodieman.posemaster.compat.ServerFeatures;
 import doodieman.posemaster.gui.PoseAwaitResponse;
+import doodieman.posemaster.objects.PresetManager;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -21,10 +22,13 @@ public final class PoseMaster extends JavaPlugin {
     private final Map<UUID, PoseAwaitResponse> awaitResponseMap = new HashMap<>();
     @Getter
     private final Map<UUID, String> lastMenuPageMap = new HashMap<>();
+    @Getter
+    private PresetManager presetManager;
 
     @Override
     public void onEnable() {
         instance = this;
+        this.presetManager = new PresetManager();
 
         if (!ServerFeatures.preloadNbtApi()) {
             getLogger().severe("Failed to initialize the NBT API. PoseMaster will be disabled!");
