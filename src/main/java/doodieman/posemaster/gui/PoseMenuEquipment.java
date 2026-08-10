@@ -29,6 +29,12 @@ public class PoseMenuEquipment extends GUI {
         this.armorStand = armorStand;
     }
 
+    @Override
+    public void open() {
+        PoseMaster.getInstance().getLastMenuPageMap().put(player.getUniqueId(), "EQUIPMENT");
+        super.open();
+    }
+
     public void createBottomItems() {
         //Create glass fill
         for (int i = 0; i < 9; i++)

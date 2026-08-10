@@ -19,6 +19,8 @@ public final class PoseMaster extends JavaPlugin {
     private static PoseMaster instance;
     @Getter
     private final Map<UUID, PoseAwaitResponse> awaitResponseMap = new HashMap<>();
+    @Getter
+    private final Map<UUID, String> lastMenuPageMap = new HashMap<>();
 
     @Override
     public void onEnable() {

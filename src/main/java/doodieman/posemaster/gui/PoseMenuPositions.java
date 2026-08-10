@@ -31,6 +31,12 @@ public class PoseMenuPositions extends GUI {
     }
 
     @Override
+    public void open() {
+        PoseMaster.getInstance().getLastMenuPageMap().put(player.getUniqueId(), "POSITIONS");
+        super.open();
+    }
+
+    @Override
     public void render() {
 
         this.layout.clear();

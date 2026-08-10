@@ -1,7 +1,9 @@
 package doodieman.posemaster;
 
 import doodieman.posemaster.compat.ArmorStandAccess;
+import doodieman.posemaster.gui.PoseMenuEquipment;
 import doodieman.posemaster.gui.PoseMenuPositions;
+import doodieman.posemaster.gui.PoseMenuSettings;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
@@ -28,7 +30,7 @@ public class PoseListener implements Listener {
 
         ArmorStand armorStand = (ArmorStand) event.getRightClicked();
         event.setCancelled(true);
-        new PoseMenuPositions(player, armorStand).open();
+        this.openMenu(player, armorStand);
     }
 
     @EventHandler ( priority = EventPriority.HIGHEST )
@@ -59,7 +61,7 @@ public class PoseListener implements Listener {
         event.setCancelled(true);
 
         if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
-            new PoseMenuPositions(player, nearestMarker).open();
+            this.openMenu(player, nearestMarker);
         } else {
             nearestMarker.remove();
             PoseMaster.sendMessage(player, "§7Removed the nearest §fmarker§7 armor stand.");
@@ -85,6 +87,21 @@ public class PoseListener implements Listener {
 
         if (ArmorStandAccess.isInvulnerable(armorStand))
             event.setCancelled(true);
+    }
+
+    /**
+     * Opens the menu page the player had open last. Defaults to the position
+     * page on first use.
+     */
+    private void openMenu(Player player, ArmorStand armorStand) {
+        String lastPage = PoseMaster.getInstance().getLastMenuPageMap().get(player.getUniqueId());
+        if ("SETTINGS".equals(lastPage)) {
+            new PoseMenuSettings(player, armorStand).open();
+        } else if ("EQUIPMENT".equals(lastPage)) {
+            new PoseMenuEquipment(player, armorStand).open();
+        } else {
+            new PoseMenuPositions(player, armorStand).open();
+        }
     }
 
     /**
