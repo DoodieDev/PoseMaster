@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'com.gradleup.shadow' version '9.6.1'
 }
 
 group = 'DoodieMan'
@@ -25,8 +26,8 @@ repositories {
         url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
     }
     maven {
-        name = 'dmulloy2-repo'
-        url = 'https://repo.dmulloy2.net/repository/public/'
+        name = 'CodeMC'
+        url = 'https://repo.codemc.io/repository/maven-public/'
     }
     maven {
         name = 'sonatype'
@@ -36,9 +37,18 @@ repositories {
 
 dependencies {
     compileOnly 'org.spigotmc:spigot:1.8.8-R0.1-SNAPSHOT'
-    compileOnly 'com.comphenix.protocol:ProtocolLib:5.0.0'
+    implementation 'de.tr7zw:item-nbt-api:2.16.0'
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    relocate('de.tr7zw.changeme.nbtapi', 'doodieman.posemaster.libs.nbtapi')
+}
+
+build {
+    dependsOn(shadowJar)
 }
 
 processResources {
