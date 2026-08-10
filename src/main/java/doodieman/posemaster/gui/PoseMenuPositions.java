@@ -45,7 +45,7 @@ public class PoseMenuPositions extends GUI {
 
         //MOVE
         String formattedCoord = StringUtil.roundDecimals(armorStand.getLocation().getX(), 4) + " " + StringUtil.roundDecimals(armorStand.getLocation().getY(), 4) + " " + StringUtil.roundDecimals(armorStand.getLocation().getZ(), 4);
-        this.layout.put(7, new ItemBuilder(MenuAssets.pistonMaterial(), "§6§lLocation", "", "§7Current: §f" + formattedCoord, "", "§aClick to change!").build());
+        this.layout.put(7, new ItemBuilder(MenuAssets.pistonMaterial(), "§6§lLocation", "", "§7Current: §f" + formattedCoord, "", "§fLeft click: §achange location", "§fRight click: §amove towards look").build());
         this.actionSlots.put(7, "MOVE");
 
         //Rotate
@@ -201,6 +201,43 @@ public class PoseMenuPositions extends GUI {
             //Move the ArmorStand
             case "MOVE":
 
+                //Right click: move towards the fixed direction the player is looking
+                if (clickType == ClickType.RIGHT) {
+                    player.closeInventory();
+                    PoseMaster.sendMessage(player, "§7Write the amount of blocks you wish it to move!");
+                    PoseMaster.sendMessage(player, "§7It moves in the direction you are currently looking,");
+                    PoseMaster.sendMessage(player, "§7fixed to NORTH, EAST, SOUTH, WEST, UP or DOWN.");
+
+                    new PoseAwaitResponse(player, 600L) {
+
+                        @Override
+                        public void onRespond(String message) {
+
+                            double distance;
+                            try {
+                                distance = Double.parseDouble(message);
+                            } catch (NumberFormatException exception) {
+                                PoseMaster.sendMessage(player, "§4" + message + " §cis an invalid number!");
+                                return;
+                            }
+
+                            //Move
+                            Vector direction = getLookDirectionVector();
+                            Location newLocation = armorStand.getLocation().clone().add(direction.multiply(distance));
+                            armorStand.teleport(newLocation);
+
+                            PoseMaster.sendMessage(player, "§aThe armorstand has been moved!");
+                        }
+
+                        @Override
+                        public void onTimeout() {
+                            PoseMaster.sendMessage(player, "§cYou took too long to respond!");
+                        }
+
+                    };
+                    break;
+                }
+
                 player.closeInventory();
                 PoseMaster.sendMessage(player, "§7Write the offset you wish it to move!");
                 PoseMaster.sendMessage(player, "§7If you want it to move up by 2 blocks,");
@@ -309,6 +346,30 @@ public class PoseMenuPositions extends GUI {
         } catch (Exception exception) {
             return null;
         }
+    }
+
+    public Vector getLookDirectionVector() {
+        float pitch = player.getLocation().getPitch();
+
+        //Looking straight up or down
+        if (pitch < -45) return new Vector(0, 1, 0);
+        if (pitch > 45) return new Vector(0, -1, 0);
+
+        //Snap the yaw to the nearest cardinal direction
+        float normalizedYaw = ((player.getLocation().getYaw() % 360) + 360) % 360;
+        int section = Math.round(normalizedYaw / 90.0f) % 4;
+
+        switch (section) {
+            case 0:
+                return new Vector(0, 0, 1); //SOUTH
+            case 1:
+                return new Vector(-1, 0, 0); //WEST
+            case 2:
+                return new Vector(0, 0, -1); //NORTH
+            case 3:
+                return new Vector(1, 0, 0); //EAST
+        }
+        return null;
     }
 
     public void changePoseValue(String pose, String coord, double value) {
