@@ -164,26 +164,50 @@ public final class ArmorStandAccess {
     // ------------------------------------------------------------------
 
     /**
-     * Returns the exact legacy DisabledSlots mask (31 = the five 1.8 slots
-     * locked against removal). The toggle logic reads back exactly what it
-     * writes on every version.
+     * Abstract equipment-lock mask: bit i = the i-th legacy slot (main hand,
+     * feet, legs, chest, head) is locked against BOTH placing and removing.
+     * EQUIPMENT_LOCK_MASK (31) locks all five legacy slots. The off-hand
+     * stays independently editable, matching the original 1.8 behavior.
+     *
+     * Each backend translates this abstract mask to its native encoding:
+     * <ul>
+     *   <li>NBT DisabledSlots: "adding or changing" bits 0-4 + "removing or
+     *       changing" bits 8-12 per locked slot (mask 31 = 7967).</li>
+     *   <li>Native API: LockType.ADDING_OR_CHANGING + LockType.REMOVING_OR_CHANGING
+     *       per locked slot.</li>
+     * </ul>
+     */
+    public static final int EQUIPMENT_LOCK_MASK = 0x1F;
+
+    /** DisabledSlots "adding or changing" group for the five legacy slots (bits 0-4). */
+    private static final int NBT_LOCK_ADDING_BITS = 0x1F;
+
+    /** DisabledSlots "removing or changing" group for the five legacy slots (bits 8-12). */
+    private static final int NBT_LOCK_REMOVING_BITS = 0x1F << 8;
+
+    /**
+     * Returns the abstract lock mask (bit i = legacy slot i fully locked).
+     * The toggle logic reads back exactly what it writes on every version.
      */
     public static int getDisabledSlots(ArmorStand stand) {
         if (ServerFeatures.HAS_EQUIPMENT_LOCK_API) return nativeGetDisabledSlots(stand);
-        return nbtGetInteger(stand, "DisabledSlots");
+        return nbtGetDisabledSlots(stand);
     }
 
     /**
-     * Writes the legacy DisabledSlots mask. On the native path the mask is
-     * mapped to REMOVING_OR_CHANGING locks on the five legacy slots; the
-     * off-hand stays independently editable. Mask 31 is preserved exactly.
+     * Applies the abstract lock mask. Locked slots are protected against
+     * both placing and removing items; unlocked slots have every lock
+     * removed.
      */
     public static void setDisabledSlots(ArmorStand stand, int mask) {
         if (ServerFeatures.HAS_EQUIPMENT_LOCK_API) {
             nativeSetDisabledSlots(stand, mask);
             return;
         }
-        nbtSetInteger(stand, "DisabledSlots", mask);
+        int locked = mask & EQUIPMENT_LOCK_MASK;
+        int addingOrChanging = locked & NBT_LOCK_ADDING_BITS;
+        int removingOrChanging = (locked << 8) & NBT_LOCK_REMOVING_BITS;
+        nbtSetInteger(stand, "DisabledSlots", addingOrChanging | removingOrChanging);
     }
 
     private static int nativeGetDisabledSlots(ArmorStand stand) {
@@ -192,13 +216,26 @@ public final class ArmorStandAccess {
             Method hasLock = ServerFeatures.findMethod(
                 ArmorStand.class, "hasEquipmentLock", EquipmentSlot.class, ServerFeatures.lockTypeClass);
             for (int i = 0; i < LEGACY_SLOTS.length; i++) {
-                boolean locked = Boolean.TRUE.equals(hasLock.invoke(
-                    stand, LEGACY_SLOTS[i], ServerFeatures.lockTypeRemovingOrChanging));
-                if (locked) mask |= (1 << i);
+                if (nativeHasAnyLock(stand, LEGACY_SLOTS[i], hasLock)) mask |= (1 << i);
             }
         } catch (Exception ignored) {
         }
         return mask;
+    }
+
+    private static boolean nativeHasAnyLock(ArmorStand stand, EquipmentSlot slot, Method hasLock) {
+        return nativeHasLock(stand, slot, hasLock, ServerFeatures.lockTypeAddingOrChanging)
+            || nativeHasLock(stand, slot, hasLock, ServerFeatures.lockTypeRemovingOrChanging)
+            || nativeHasLock(stand, slot, hasLock, ServerFeatures.lockTypeAdding);
+    }
+
+    private static boolean nativeHasLock(ArmorStand stand, EquipmentSlot slot, Method hasLock, Object lockType) {
+        if (lockType == null) return false;
+        try {
+            return Boolean.TRUE.equals(hasLock.invoke(stand, slot, lockType));
+        } catch (Exception ignored) {
+            return false;
+        }
     }
 
     private static void nativeSetDisabledSlots(ArmorStand stand, int mask) {
@@ -208,13 +245,26 @@ public final class ArmorStandAccess {
             Method removeLock = ServerFeatures.findMethod(ArmorStand.class, "removeEquipmentLock", EquipmentSlot.class);
             for (int i = 0; i < LEGACY_SLOTS.length; i++) {
                 if ((mask & (1 << i)) != 0) {
-                    addLock.invoke(stand, LEGACY_SLOTS[i], ServerFeatures.lockTypeRemovingOrChanging);
+                    if (ServerFeatures.lockTypeAddingOrChanging != null)
+                        addLock.invoke(stand, LEGACY_SLOTS[i], ServerFeatures.lockTypeAddingOrChanging);
+                    if (ServerFeatures.lockTypeRemovingOrChanging != null)
+                        addLock.invoke(stand, LEGACY_SLOTS[i], ServerFeatures.lockTypeRemovingOrChanging);
                 } else {
                     removeLock.invoke(stand, LEGACY_SLOTS[i]);
                 }
             }
         } catch (Exception ignored) {
         }
+    }
+
+    private static int nbtGetDisabledSlots(ArmorStand stand) {
+        int raw = nbtGetInteger(stand, "DisabledSlots");
+        int mask = 0;
+        for (int i = 0; i < LEGACY_SLOTS.length; i++) {
+            int slotBits = (1 << i) | (1 << (i + 8)) | (1 << (i + 16));
+            if ((raw & slotBits) != 0) mask |= (1 << i);
+        }
+        return mask;
     }
 
     // ------------------------------------------------------------------

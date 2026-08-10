@@ -47,7 +47,9 @@ public final class ServerFeatures {
 
     // Equipment lock native API support (1.16.2+).
     static Class<?> lockTypeClass;               // org.bukkit.entity.ArmorStand$LockType
+    static Object lockTypeAddingOrChanging;      // LockType.ADDING_OR_CHANGING
     static Object lockTypeRemovingOrChanging;    // LockType.REMOVING_OR_CHANGING
+    static Object lockTypeAdding;                // LockType.ADDING (optional)
 
     private static final Map<MethodKey, Method> METHOD_CACHE = new HashMap<>();
 
@@ -146,7 +148,9 @@ public final class ServerFeatures {
             }
             if (lockTypeClass == null) return false;
             lockTypeRemovingOrChanging = enumConstant(lockTypeClass, "REMOVING_OR_CHANGING");
-            if (lockTypeRemovingOrChanging == null) return false;
+            lockTypeAddingOrChanging = enumConstant(lockTypeClass, "ADDING_OR_CHANGING");
+            if (lockTypeRemovingOrChanging == null || lockTypeAddingOrChanging == null) return false;
+            lockTypeAdding = enumConstant(lockTypeClass, "ADDING");
             Class<?> armorStandClass = Class.forName("org.bukkit.entity.ArmorStand");
             return findMethod(armorStandClass, "addEquipmentLock", EquipmentSlot.class, lockTypeClass) != null
                 && findMethod(armorStandClass, "removeEquipmentLock", EquipmentSlot.class) != null

@@ -78,7 +78,7 @@ public class PoseMenuSettings extends GUI {
         String currentMarker = armorStand.isMarker() ? "§aEnabled" : "§cDisabled";
         ItemBuilder marker = new ItemBuilder(MenuAssets.carpetMaterial())
             .name("§9§lMarker")
-            .lore("", "§7Current: " + currentMarker, "", "§aClick to toggle!");
+            .lore("", "§7Current: " + currentMarker, "", "§aClick to toggle!", "", "§cWarning: marker stands have no", "§chitbox and cannot be clicked", "§cor hit anymore!", "§7Remove with the poisonous", "§7potato while standing nearby.");
         if (armorStand.isMarker()) marker.makeGlowing();
 
         //Arms
@@ -156,11 +156,11 @@ public class PoseMenuSettings extends GUI {
         //----- 1.16.2+ -----
 
         //Equipment lock
-        String currentEquipLock = ArmorStandAccess.getDisabledSlots(armorStand) == 31 ? "§aEnabled" : "§cDisabled";
+        String currentEquipLock = ArmorStandAccess.getDisabledSlots(armorStand) == ArmorStandAccess.EQUIPMENT_LOCK_MASK ? "§aEnabled" : "§cDisabled";
         ItemBuilder equiplock = new ItemBuilder(Material.IRON_CHESTPLATE)
             .name("§f§lEquipment Lock")
             .lore("", "§7Current: " + currentEquipLock, "", "§aClick to toggle!");
-        if (ArmorStandAccess.getDisabledSlots(armorStand) == 31) equiplock.makeGlowing();
+        if (ArmorStandAccess.getDisabledSlots(armorStand) == ArmorStandAccess.EQUIPMENT_LOCK_MASK) equiplock.makeGlowing();
 
         //----- 1.20.5+ -----
 
@@ -290,8 +290,8 @@ public class PoseMenuSettings extends GUI {
                 break;
 
             case "EQUIPLOCK":
-                boolean currentEquipLock = ArmorStandAccess.getDisabledSlots(armorStand) == 31;
-                ArmorStandAccess.setDisabledSlots(armorStand, currentEquipLock ? 0 : 31);
+                boolean currentEquipLock = ArmorStandAccess.getDisabledSlots(armorStand) == ArmorStandAccess.EQUIPMENT_LOCK_MASK;
+                ArmorStandAccess.setDisabledSlots(armorStand, currentEquipLock ? 0 : ArmorStandAccess.EQUIPMENT_LOCK_MASK);
                 this.render();
                 break;
 

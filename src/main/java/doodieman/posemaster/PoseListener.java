@@ -5,13 +5,16 @@ import doodieman.posemaster.gui.PoseMenuPositions;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.EulerAngle;
 
@@ -33,6 +36,26 @@ public class PoseListener implements Listener {
         if (!(event.getEntity() instanceof ArmorStand)) return;
 
         applyDefaultState((ArmorStand) event.getEntity());
+    }
+
+    /**
+     * Marker armor stands have no hitbox (vanilla), so they can never be clicked
+     * or hit. This handler lets the potato remove the nearest marker stand
+     * within range by interacting in the air/on a block.
+     */
+    @EventHandler ( priority = EventPriority.HIGHEST )
+    public void onMarkerPotatoInteract(PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+        Player player = event.getPlayer();
+        if (player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR) return;
+        if (!this.isHoldingTriggerItem(player)) return;
+
+        ArmorStand nearestMarker = this.findNearestMarkerStand(player, 5.0);
+        if (nearestMarker == null) return;
+
+        event.setCancelled(true);
+        nearestMarker.remove();
+        PoseMaster.sendMessage(player, "§7Removed the nearest §fmarker§7 armor stand.");
     }
 
     @EventHandler ( priority = EventPriority.HIGHEST )
@@ -72,12 +95,30 @@ public class PoseListener implements Listener {
         armorStand.setLeftLegPose(zeroEuler);
 
         ArmorStandAccess.setInvulnerable(armorStand, true);
-        ArmorStandAccess.setDisabledSlots(armorStand, 31);
+        ArmorStandAccess.setDisabledSlots(armorStand, ArmorStandAccess.EQUIPMENT_LOCK_MASK);
     }
 
     private boolean isHoldingTriggerItem(Player player) {
         ItemStack item = ArmorStandAccess.getMainHand(player.getEquipment());
         return item != null && item.getType() == Material.POISONOUS_POTATO;
+    }
+
+    private ArmorStand findNearestMarkerStand(Player player, double radius) {
+        ArmorStand nearest = null;
+        double closest = radius * radius;
+        for (Entity entity : player.getNearbyEntities(radius, radius, radius)) {
+            if (!(entity instanceof ArmorStand)) continue;
+
+            ArmorStand stand = (ArmorStand) entity;
+            if (!stand.isMarker()) continue;
+
+            double distance = player.getLocation().distanceSquared(stand.getLocation());
+            if (distance < closest) {
+                closest = distance;
+                nearest = stand;
+            }
+        }
+        return nearest;
     }
 
 }

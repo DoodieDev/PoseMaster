@@ -64,7 +64,7 @@ public class ArmorStandState {
     @Getter @Setter
     private boolean invulnerable = true;
     @Getter @Setter
-    private int disabledSlots = 31;
+    private int disabledSlots = ArmorStandAccess.EQUIPMENT_LOCK_MASK;
 
     @Getter @Setter
     private boolean glow = false;
