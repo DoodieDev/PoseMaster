@@ -3,6 +3,7 @@ package doodieman.posemaster.objects;
 import doodieman.posemaster.compat.ArmorStandAccess;
 import doodieman.posemaster.compat.ServerFeatures;
 import lombok.Getter;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.ArmorStand;
@@ -11,7 +12,8 @@ import org.bukkit.util.EulerAngle;
 
 /**
  * A named, persistent snapshot of an ArmorStand. Everything except the
- * position (x/y/z) is captured, including the rotation (yaw).
+ * position is captured; only the fractional part of the coordinates is kept,
+ * so applying a preset snaps the stand's position onto the same decimals.
  */
 public class Preset {
 
@@ -19,31 +21,59 @@ public class Preset {
     private final String name;
     @Getter
     private final ArmorStandState state;
+    @Getter
+    private final double fractionX;
+    @Getter
+    private final double fractionY;
+    @Getter
+    private final double fractionZ;
 
-    public Preset(String name, ArmorStandState state) {
+    public Preset(String name, ArmorStandState state, double fractionX, double fractionY, double fractionZ) {
         this.name = name;
         this.state = state;
+        this.fractionX = fractionX;
+        this.fractionY = fractionY;
+        this.fractionZ = fractionZ;
     }
 
     public static Preset fromArmorStand(String name, ArmorStand stand) {
-        return new Preset(name, ArmorStandState.fromArmorStand(stand.getLocation(), stand));
+        Location location = stand.getLocation();
+        return new Preset(
+            name,
+            ArmorStandState.fromArmorStand(location, stand),
+            fractionalPart(location.getX()),
+            fractionalPart(location.getY()),
+            fractionalPart(location.getZ())
+        );
     }
 
     /**
-     * Applies every captured value to the stand. The position is kept and
-     * only the rotation is written back.
+     * Applies every captured value to the stand. The integer part of the
+     * current position is kept, the fractional parts of the preset are
+     * written on top of it.
      */
     public void applyTo(ArmorStand stand) {
         this.state.applyTo(stand);
 
         Location newLocation = stand.getLocation().clone();
+        newLocation.setX(Math.floor(newLocation.getX()) + this.fractionX);
+        newLocation.setY(Math.floor(newLocation.getY()) + this.fractionY);
+        newLocation.setZ(Math.floor(newLocation.getZ()) + this.fractionZ);
         newLocation.setYaw((float) this.state.getRotation());
         stand.teleport(newLocation);
+    }
+
+    private static double fractionalPart(double value) {
+        return value - Math.floor(value);
     }
 
     public void save(ConfigurationSection section) {
         section.set("name", this.name);
         section.set("rotation", this.state.getRotation());
+
+        section.set("locationFraction.x", this.fractionX);
+        section.set("locationFraction.y", this.fractionY);
+        section.set("locationFraction.z", this.fractionZ);
 
         if (this.state.getMainHand() != null) section.set("mainHand", this.state.getMainHand().serialize());
         if (this.state.getArmorContents() != null) {
@@ -75,6 +105,7 @@ public class Preset {
         section.set("disabledSlots", this.state.getDisabledSlots());
 
         if (ServerFeatures.HAS_GLOW) section.set("glow", this.state.isGlow());
+        if (ServerFeatures.HAS_GLOW_COLOR && this.state.getGlowColor() != null) section.set("glowColor", this.state.getGlowColor().asRGB());
         if (ServerFeatures.HAS_SILENT) section.set("silent", this.state.isSilent());
         if (ServerFeatures.HAS_SCALE) section.set("scale", this.state.getScale());
     }
@@ -119,13 +150,19 @@ public class Preset {
         state.setDisabledSlots(section.getInt("disabledSlots", ArmorStandAccess.EQUIPMENT_LOCK_MASK));
 
         if (ServerFeatures.HAS_GLOW) state.setGlow(section.getBoolean("glow", false));
+        if (ServerFeatures.HAS_GLOW_COLOR && section.contains("glowColor")) state.setGlowColor(Color.fromRGB(section.getInt("glowColor")));
         if (ServerFeatures.HAS_SILENT) state.setSilent(section.getBoolean("silent", false));
         if (ServerFeatures.HAS_SCALE) state.setScale(section.getDouble("scale", 1.0));
 
         String name = section.getString("name");
         if (name == null) return null;
 
-        return new Preset(name, state);
+        ConfigurationSection fractionSection = section.getConfigurationSection("locationFraction");
+        double fractionX = fractionSection == null ? 0.0 : fractionSection.getDouble("x", 0.0);
+        double fractionY = fractionSection == null ? 0.0 : fractionSection.getDouble("y", 0.0);
+        double fractionZ = fractionSection == null ? 0.0 : fractionSection.getDouble("z", 0.0);
+
+        return new Preset(name, state, fractionX, fractionY, fractionZ);
     }
 
     private static void savePose(ConfigurationSection section, String path, EulerAngle pose) {

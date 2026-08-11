@@ -1,14 +1,21 @@
 package doodieman.posemaster.compat;
 
 import de.tr7zw.changeme.nbtapi.NBT;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * All armor-stand state that touches version-specific APIs.
@@ -138,6 +145,126 @@ public final class ArmorStandAccess {
             method.invoke(entity, value);
         } catch (Exception ignored) {
         }
+    }
+
+    /**
+     * Glow color (Entity#setGlowColor on 1.17-1.21.x, scoreboard-team fallback
+     * elsewhere). Null when unset or unsupported.
+     */
+    public static Color getGlowColor(Entity entity) {
+        if (!ServerFeatures.HAS_GLOW_COLOR) return null;
+        if (ServerFeatures.glowColorGetter != null) {
+            try {
+                return (Color) ServerFeatures.glowColorGetter.invoke(entity);
+            } catch (Exception exception) {
+            }
+        }
+        return teamGetGlowColor(entity);
+    }
+
+    /** Sets the glow color; null resets to the default color. */
+    public static void setGlowColor(Entity entity, Color color) {
+        if (!ServerFeatures.HAS_GLOW_COLOR) return;
+        if (ServerFeatures.glowColorSetter != null) {
+            try {
+                ServerFeatures.glowColorSetter.invoke(entity, color);
+                return;
+            } catch (Exception ignored) {
+            }
+        }
+        teamSetGlowColor(entity, color);
+    }
+
+    // ------------------------------------------------------------------
+    // Glow color via scoreboard teams (Team#setColor, 1.13+)
+    //
+    // Newer versions removed Entity#setGlowColor; the colored glow is
+    // team-based there. Teams only support the 16 classic colors, so hex
+    // input is snapped to the nearest one. One shared team per color on
+    // the main scoreboard (only it is sent to clients).
+    // ------------------------------------------------------------------
+
+    private static final Map<ChatColor, Color> TEAM_COLOR_RGB = new LinkedHashMap<>();
+
+    static {
+        TEAM_COLOR_RGB.put(ChatColor.BLACK, Color.fromRGB(0x000000));
+        TEAM_COLOR_RGB.put(ChatColor.DARK_BLUE, Color.fromRGB(0x0000AA));
+        TEAM_COLOR_RGB.put(ChatColor.DARK_GREEN, Color.fromRGB(0x00AA00));
+        TEAM_COLOR_RGB.put(ChatColor.DARK_AQUA, Color.fromRGB(0x00AAAA));
+        TEAM_COLOR_RGB.put(ChatColor.DARK_RED, Color.fromRGB(0xAA0000));
+        TEAM_COLOR_RGB.put(ChatColor.DARK_PURPLE, Color.fromRGB(0xAA00AA));
+        TEAM_COLOR_RGB.put(ChatColor.GOLD, Color.fromRGB(0xFFAA00));
+        TEAM_COLOR_RGB.put(ChatColor.GRAY, Color.fromRGB(0xAAAAAA));
+        TEAM_COLOR_RGB.put(ChatColor.DARK_GRAY, Color.fromRGB(0x555555));
+        TEAM_COLOR_RGB.put(ChatColor.BLUE, Color.fromRGB(0x5555FF));
+        TEAM_COLOR_RGB.put(ChatColor.GREEN, Color.fromRGB(0x55FF55));
+        TEAM_COLOR_RGB.put(ChatColor.AQUA, Color.fromRGB(0x55FFFF));
+        TEAM_COLOR_RGB.put(ChatColor.RED, Color.fromRGB(0xFF5555));
+        TEAM_COLOR_RGB.put(ChatColor.LIGHT_PURPLE, Color.fromRGB(0xFF55FF));
+        TEAM_COLOR_RGB.put(ChatColor.YELLOW, Color.fromRGB(0xFFFF55));
+        TEAM_COLOR_RGB.put(ChatColor.WHITE, Color.fromRGB(0xFFFFFF));
+    }
+
+    private static Color teamGetGlowColor(Entity entity) {
+        try {
+            Scoreboard board = Bukkit.getScoreboardManager().getMainScoreboard();
+            if (board == null) return null;
+            String entry = entity.getUniqueId().toString();
+            for (Map.Entry<ChatColor, Color> teamColor : TEAM_COLOR_RGB.entrySet()) {
+                Team team = board.getTeam(glowTeamName(teamColor.getKey()));
+                if (team != null && team.hasEntry(entry)) return teamColor.getValue();
+            }
+        } catch (Exception exception) {
+        }
+        return null;
+    }
+
+    private static void teamSetGlowColor(Entity entity, Color color) {
+        try {
+            Scoreboard board = Bukkit.getScoreboardManager().getMainScoreboard();
+            if (board == null) return;
+            String entry = entity.getUniqueId().toString();
+
+            //Reset: remove the entity from every plugin glow team
+            if (color == null) {
+                for (Map.Entry<ChatColor, Color> teamColor : TEAM_COLOR_RGB.entrySet()) {
+                    Team team = board.getTeam(glowTeamName(teamColor.getKey()));
+                    if (team != null && team.hasEntry(entry)) team.removeEntry(entry);
+                }
+                return;
+            }
+
+            ChatColor nearest = nearestChatColor(color);
+            Team team = board.getTeam(glowTeamName(nearest));
+            if (team == null) team = board.registerNewTeam(glowTeamName(nearest));
+            ServerFeatures.teamColorSetter.invoke(team, nearest);
+            team.addEntry(entry);
+        } catch (Exception ignored) {
+        }
+    }
+
+    private static ChatColor nearestChatColor(Color color) {
+        ChatColor nearest = ChatColor.WHITE;
+        double nearestDistance = Double.MAX_VALUE;
+        for (Map.Entry<ChatColor, Color> teamColor : TEAM_COLOR_RGB.entrySet()) {
+            double distance = colorDistanceSquared(color, teamColor.getValue());
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearest = teamColor.getKey();
+            }
+        }
+        return nearest;
+    }
+
+    private static double colorDistanceSquared(Color first, Color second) {
+        int red = first.getRed() - second.getRed();
+        int green = first.getGreen() - second.getGreen();
+        int blue = first.getBlue() - second.getBlue();
+        return red * red + green * green + blue * blue;
+    }
+
+    private static String glowTeamName(ChatColor color) {
+        return "PMGlow_" + color.ordinal();
     }
 
     public static boolean isSilent(Entity entity) {

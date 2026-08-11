@@ -222,6 +222,7 @@ public class PoseMenuPositions extends GUI {
                     PoseMaster.sendMessage(player, "§7Write the amount of blocks you wish it to move!");
                     PoseMaster.sendMessage(player, "§7It moves in the direction you are currently looking,");
                     PoseMaster.sendMessage(player, "§7fixed to NORTH, EAST, SOUTH, WEST, UP or DOWN.");
+                    PoseMaster.sendMessage(player, "§7To move in pixels, add a §fp§7. Example: §f5p§7 = 5/16.");
 
                     new PoseAwaitResponse(player, 600L) {
 
@@ -230,7 +231,7 @@ public class PoseMenuPositions extends GUI {
 
                             double distance;
                             try {
-                                distance = Double.parseDouble(message);
+                                distance = parseOffsetValue(message);
                             } catch (NumberFormatException exception) {
                                 PoseMaster.sendMessage(player, "§4" + message + " §cis an invalid number!");
                                 return;
@@ -257,6 +258,7 @@ public class PoseMenuPositions extends GUI {
                 PoseMaster.sendMessage(player, "§7Write the offset you wish it to move!");
                 PoseMaster.sendMessage(player, "§7If you want it to move up by 2 blocks,");
                 PoseMaster.sendMessage(player, "§7then type §f0 2 0§7.");
+                PoseMaster.sendMessage(player, "§7To move in pixels, add a §fp§7. Example: §f5p 0 3p§7 = 5/16, 0, 3/16.");
 
                 new PoseAwaitResponse(player, 600L) {
 
@@ -354,13 +356,20 @@ public class PoseMenuPositions extends GUI {
     public Vector stringToVector(String text) {
         try {
             String[] split = text.split(" ");
-            double x = Double.parseDouble(split[0]);
-            double y = Double.parseDouble(split[1]);
-            double z = Double.parseDouble(split[2]);
+            double x = parseOffsetValue(split[0]);
+            double y = parseOffsetValue(split[1]);
+            double z = parseOffsetValue(split[2]);
             return new Vector(x, y, z);
         } catch (Exception exception) {
             return null;
         }
+    }
+
+    public double parseOffsetValue(String value) {
+        boolean isPixel = value.toLowerCase().endsWith("p");
+        double number = Double.parseDouble(isPixel ? value.substring(0, value.length() - 1) : value);
+        if (isPixel) number = number / 16.0;
+        return number;
     }
 
     public Vector getLookDirectionVector() {

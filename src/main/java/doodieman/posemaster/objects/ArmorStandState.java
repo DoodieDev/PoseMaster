@@ -4,6 +4,7 @@ import doodieman.posemaster.compat.ArmorStandAccess;
 import doodieman.posemaster.compat.ServerFeatures;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.inventory.ItemStack;
@@ -69,6 +70,8 @@ public class ArmorStandState {
     @Getter @Setter
     private boolean glow = false;
     @Getter @Setter
+    private Color glowColor;
+    @Getter @Setter
     private boolean silent = false;
     @Getter @Setter
     private double scale = 1.0;
@@ -108,6 +111,7 @@ public class ArmorStandState {
         state.invulnerable = ArmorStandAccess.isInvulnerable(stand);
         state.disabledSlots = ArmorStandAccess.getDisabledSlots(stand);
         if (ServerFeatures.HAS_GLOW) state.glow = ArmorStandAccess.isGlowing(stand);
+        if (ServerFeatures.HAS_GLOW_COLOR) state.glowColor = ArmorStandAccess.getGlowColor(stand);
         if (ServerFeatures.HAS_SILENT) state.silent = ArmorStandAccess.isSilent(stand);
         if (ServerFeatures.HAS_SCALE) state.scale = ArmorStandAccess.getScale(stand);
 
@@ -157,6 +161,7 @@ public class ArmorStandState {
         ArmorStandAccess.setInvulnerable(stand, invulnerable);
         ArmorStandAccess.setDisabledSlots(stand, disabledSlots);
         if (ServerFeatures.HAS_GLOW) ArmorStandAccess.setGlowing(stand, glow);
+        if (ServerFeatures.HAS_GLOW_COLOR) ArmorStandAccess.setGlowColor(stand, glowColor);
         if (ServerFeatures.HAS_SILENT) ArmorStandAccess.setSilent(stand, silent);
         if (ServerFeatures.HAS_SCALE) ArmorStandAccess.setScale(stand, scale);
 

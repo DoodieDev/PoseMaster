@@ -7,6 +7,7 @@ import doodieman.posemaster.compat.ServerFeatures;
 import doodieman.posemaster.utils.GUI;
 import doodieman.posemaster.utils.ItemBuilder;
 import doodieman.posemaster.utils.StringUtil;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
@@ -150,7 +151,14 @@ public class PoseMenuSettings extends GUI {
             String currentGlow = ArmorStandAccess.isGlowing(armorStand) ? "§aEnabled" : "§cDisabled";
             glow = new ItemBuilder(Material.GLOWSTONE_DUST)
                 .name("§e§lGlow")
-                .lore("", "§7Current: " + currentGlow, "", "§aClick to toggle!");
+                .lore("", "§7Current: " + currentGlow);
+            if (ServerFeatures.HAS_GLOW_COLOR) {
+                Color glowColor = ArmorStandAccess.getGlowColor(armorStand);
+                if (glowColor != null) glow.addLore("", "§7Color: §f#" + glowColorHex(glowColor));
+                glow.addLore("", "§aLeft click to toggle!", "§6Right click to change color!");
+            } else {
+                glow.addLore("", "§aClick to toggle!");
+            }
             if (ArmorStandAccess.isGlowing(armorStand)) glow.makeGlowing();
         }
 
@@ -318,6 +326,41 @@ public class PoseMenuSettings extends GUI {
                 break;
 
             case "GLOW":
+                if (clickType.isRightClick()) {
+                    //Glow color (1.17+); hidden on older versions
+                    if (!ServerFeatures.HAS_GLOW_COLOR) break;
+                    player.closeInventory();
+                    PoseMaster.sendMessage(player, "§7Write the glow color as a §fHEX color code§7.");
+                    PoseMaster.sendMessage(player, "§7Example: §f#FF55AA");
+                    if (ServerFeatures.usesTeamGlowColor())
+                        PoseMaster.sendMessage(player, "§7Snapped to the nearest of the §f16 §7vanilla glow colors.");
+
+                    new PoseAwaitResponse(player, 600L) {
+
+                        @Override
+                        public void onRespond(String message) {
+                            String value = message.trim().replace("#", "");
+                            if (!value.matches("[0-9a-fA-F]{6}")) {
+                                PoseMaster.sendMessage(player, "§4" + message + " §cis an invalid HEX color code!");
+                                return;
+                            }
+
+                            Color color = Color.fromRGB(Integer.parseInt(value, 16));
+                            ArmorStandAccess.setGlowColor(armorStand, color);
+                            ArmorStandAccess.setGlowing(armorStand, true);
+                            Color applied = ArmorStandAccess.getGlowColor(armorStand);
+                            String appliedHex = applied != null ? glowColorHex(applied) : value.toUpperCase();
+                            PoseMaster.sendMessage(player, "§aChanged the glow color to §2#" + appliedHex + "§a!");
+                        }
+
+                        @Override
+                        public void onTimeout() {
+                            PoseMaster.sendMessage(player, "§cYou took too long to respond!");
+                        }
+                    };
+                    break;
+                }
+
                 ArmorStandAccess.setGlowing(armorStand, !ArmorStandAccess.isGlowing(armorStand));
                 this.render();
                 break;
@@ -382,6 +425,11 @@ public class PoseMenuSettings extends GUI {
                 break;
         }
 
+    }
+
+    private static String glowColorHex(Color color) {
+        if (color == null) return "FFFFFF";
+        return String.format("%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
     }
 
 }

@@ -1,8 +1,12 @@
 package doodieman.posemaster.compat;
 
 import de.tr7zw.changeme.nbtapi.NBT;
+import org.bukkit.ChatColor;
+import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.scoreboard.Team;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -26,6 +30,8 @@ public final class ServerFeatures {
     public static final boolean HAS_INVULNERABLE;
     /** Entity#setGlowing (1.9+) */
     public static final boolean HAS_GLOW;
+    /** Colored glow: Entity#setGlowColor (1.17-1.21.x) or Team#setColor (1.13+ team-colored glow) */
+    public static final boolean HAS_GLOW_COLOR;
     /** Entity#setSilent (1.9+) */
     public static final boolean HAS_SILENT;
     /** ArmorStand#addEquipmentLock / removeEquipmentLock / hasEquipmentLock (1.16.2+) */
@@ -51,15 +57,31 @@ public final class ServerFeatures {
     static Object lockTypeRemovingOrChanging;    // LockType.REMOVING_OR_CHANGING
     static Object lockTypeAdding;                // LockType.ADDING (optional)
 
+    // Glow color support. Entity#setGlowColor was removed from the API in
+    // newer versions, where the colored glow is team-based instead. The team
+    // fallback requires Team#setColor (1.13+).
+    static Method glowColorSetter;               // Entity#setGlowColor(Color)
+    static Method glowColorGetter;               // Entity#getGlowColor()
+    static Method teamColorSetter;               // Team#setColor(ChatColor)
+
     private static final Map<MethodKey, Method> METHOD_CACHE = new HashMap<>();
 
     static {
         HAS_OFF_HAND = hasMethod("org.bukkit.inventory.EntityEquipment", "getItemInOffHand");
         HAS_INVULNERABLE = hasMethod("org.bukkit.entity.Entity", "setInvulnerable", boolean.class);
         HAS_GLOW = hasMethod("org.bukkit.entity.Entity", "setGlowing", boolean.class);
+        glowColorSetter = findMethod(Entity.class, "setGlowColor", Color.class);
+        glowColorGetter = findMethod(Entity.class, "getGlowColor");
+        teamColorSetter = findMethod(Team.class, "setColor", ChatColor.class);
+        HAS_GLOW_COLOR = glowColorSetter != null || teamColorSetter != null;
         HAS_SILENT = hasMethod("org.bukkit.entity.Entity", "setSilent", boolean.class);
         HAS_EQUIPMENT_LOCK_API = detectEquipmentLockApi();
         HAS_SCALE = detectScaleSupport();
+    }
+
+    /** Whether glow colors use the scoreboard-team fallback (no setGlowColor API). */
+    public static boolean usesTeamGlowColor() {
+        return glowColorSetter == null && teamColorSetter != null;
     }
 
     private ServerFeatures() {
@@ -81,10 +103,12 @@ public final class ServerFeatures {
         logger.info("Detected server features: off-hand=" + HAS_OFF_HAND
             + ", invulnerable-api=" + HAS_INVULNERABLE
             + ", glow=" + HAS_GLOW
+            + ", glow-color=" + HAS_GLOW_COLOR
             + ", silent=" + HAS_SILENT
             + ", equipment-lock-api=" + HAS_EQUIPMENT_LOCK_API
             + ", scale=" + HAS_SCALE);
         if (!HAS_SCALE) logger.warning("Scale support not detected; the Scale option will be hidden in the GUI.");
+        if (!HAS_GLOW_COLOR) logger.warning("Glow color support not detected; glow colors will be hidden in the GUI.");
         if (!HAS_OFF_HAND) logger.warning("Off-hand support not detected; the Off-Hand slot will be hidden in the GUI.");
     }
 
