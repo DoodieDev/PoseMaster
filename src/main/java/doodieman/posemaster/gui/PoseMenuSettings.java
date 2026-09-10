@@ -1,12 +1,14 @@
 package doodieman.posemaster.gui;
 
 import doodieman.posemaster.PoseMaster;
+import doodieman.posemaster.compat.ArmorStandAccess;
+import doodieman.posemaster.compat.MenuAssets;
+import doodieman.posemaster.compat.ServerFeatures;
 import doodieman.posemaster.utils.GUI;
 import doodieman.posemaster.utils.ItemBuilder;
 import doodieman.posemaster.utils.StringUtil;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
+import org.bukkit.Color;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -24,14 +26,20 @@ public class PoseMenuSettings extends GUI {
 
 
     public PoseMenuSettings(Player player, ArmorStand armorStand) {
-        super(player, 5, "ID: "+armorStand.getEntityId());
+        super(player, 5, "ID: " + armorStand.getEntityId());
         this.armorStand = armorStand;
+    }
+
+    @Override
+    public void open() {
+        PoseMaster.getInstance().getLastMenuPageMap().put(player.getUniqueId(), "SETTINGS");
+        super.open();
     }
 
     public void createBottomItems() {
         //Create glass fill
         for (int i = 0; i < 9; i++)
-            this.layout.put(i+(4*9), GUIItem.GLASS_FILL.getItem());
+            this.layout.put(i + (4 * 9), GUIItem.GLASS_FILL.getItem());
 
         ItemBuilder position = new ItemBuilder(Material.ARMOR_STAND)
             .name("§e§lPosition")
@@ -43,127 +51,205 @@ public class PoseMenuSettings extends GUI {
             .name("§8§lSettings")
             .lore("", "§fThis page is for changing the", "§fsettings of the ArmorStand.", "", "§7§oCurrently selected!")
             .makeGlowing();
+        ItemBuilder presets = new ItemBuilder(Material.BOOK)
+            .name("§d§lPresets")
+            .lore("", "§fThis page is for saving and applying", "§fpresets to the ArmorStand.", "", "§aClick to open!");
 
         this.layout.put(39, position.build());
         this.actionSlots.put(39, "PAGE-POSITION");
         this.layout.put(40, equipment.build());
         this.actionSlots.put(40, "PAGE-EQUIPMENT");
         this.layout.put(41, settings.build());
+        this.layout.put(44, presets.build());
+        this.actionSlots.put(44, "PAGE-PRESETS");
     }
 
     @Override
     public void render() {
 
+        //Dynamic layout: rebuilt from scratch on every render
+        this.layout.clear();
+        this.actionSlots.clear();
+
         //Render bottom items
         this.createBottomItems();
 
-        //Toggle Small
+        //Items are sorted by their lowest supported server version:
+        //lowest version at the top, highest version at the bottom.
+
+        //----- 1.8.8+ -----
+
+        //Small
         String currentSmall = armorStand.isSmall() ? "§aEnabled" : "§cDisabled";
-        ItemBuilder small = new ItemBuilder(Material.DOUBLE_PLANT)
+        ItemBuilder small = new ItemBuilder(MenuAssets.grassMaterial())
             .name("§e§lSmall")
-            .lore("", "§7Current: "+currentSmall, "", "§aClick to toggle!");
+            .lore("", "§7Current: " + currentSmall, "", "§aClick to toggle!");
         if (armorStand.isSmall()) small.makeGlowing();
 
-        //Invulnerable
-        NBTTagCompound tag = new NBTTagCompound();
-        ((CraftEntity) armorStand).getHandle().c(tag);
-        String currentInvul = tag.getInt("Invulnerable") == 1 ? "§aEnabled" : "§cDisabled";
-        ItemBuilder invulnerable = new ItemBuilder(Material.GOLDEN_APPLE)
-            .name("§e§lInvulnerable")
-            .lore("", "§7Current: "+currentInvul, "", "§aClick to toggle!");
-        if (tag.getInt("Invulnerable") == 1) invulnerable.makeGlowing();
-
-        //Visible
-        String currentVisible = armorStand.isVisible() ? "§aEnabled" : "§cDisabled";
-        ItemBuilder visible = new ItemBuilder(Material.GLASS_BOTTLE)
-            .name("§b§lVisibility")
-            .lore("", "§7Current: "+currentVisible, "", "§aClick to toggle!");
-        if (armorStand.isVisible()) visible.makeGlowing();
-        if (armorStand.isVisible()) visible.material(Material.POTION);
+        //Marker (1.8.8+)
+        String currentMarker = armorStand.isMarker() ? "§aEnabled" : "§cDisabled";
+        ItemBuilder marker = new ItemBuilder(MenuAssets.carpetMaterial())
+            .name("§9§lMarker")
+            .lore("", "§7Current: " + currentMarker, "", "§aClick to toggle!", "", "§cWarning: marker stands have no", "§chitbox and cannot be clicked", "§cor hit anymore!", "§7Right-click with the poisonous", "§7potato nearby to edit, left-click", "§7to remove.");
+        if (armorStand.isMarker()) marker.makeGlowing();
 
         //Arms
         String currentArms = armorStand.hasArms() ? "§aEnabled" : "§cDisabled";
         ItemBuilder arms = new ItemBuilder(Material.STICK)
             .name("§6§lArms")
-            .lore("", "§7Current: "+currentArms, "", "§aClick to toggle!");
+            .lore("", "§7Current: " + currentArms, "", "§aClick to toggle!");
         if (armorStand.hasArms()) arms.makeGlowing();
 
         //Gravity
         String currentGravity = armorStand.hasGravity() ? "§aEnabled" : "§cDisabled";
         ItemBuilder gravity = new ItemBuilder(Material.FEATHER)
             .name("§f§lGravity")
-            .lore("", "§7Current: "+currentGravity, "", "§aClick to toggle!");
+            .lore("", "§7Current: " + currentGravity, "", "§aClick to toggle!");
         if (armorStand.hasGravity()) gravity.makeGlowing();
-
-        //Name visisble
-        String currentNameVisible = armorStand.isCustomNameVisible() ? "§aEnabled" : "§cDisabled";
-        ItemBuilder nameVisible = new ItemBuilder(Material.NAME_TAG)
-            .name("§e§lName Visibility")
-            .lore("", "§7Current: "+currentNameVisible, "", "§aClick to toggle!");
-        if (armorStand.isCustomNameVisible()) nameVisible.makeGlowing();
 
         //Baseplate
         String currentBaseplate = armorStand.hasBasePlate() ? "§aEnabled" : "§cDisabled";
-        ItemBuilder baseplate = new ItemBuilder(Material.STEP)
+        ItemBuilder baseplate = new ItemBuilder(MenuAssets.stoneSlabMaterial())
             .name("§7§lBaseplate")
-            .lore("", "§7Current: "+currentBaseplate, "", "§aClick to toggle!");
+            .lore("", "§7Current: " + currentBaseplate, "", "§aClick to toggle!");
         if (armorStand.hasBasePlate()) baseplate.makeGlowing();
 
-        //Equip lock
-        String currentEquipLock = tag.getInt("DisabledSlots") == 31 ? "§aEnabled" : "§cDisabled";
-        ItemBuilder equiplock = new ItemBuilder(Material.IRON_CHESTPLATE)
-            .name("§f§lEquipment Lock")
-            .lore("", "§7Current: "+currentEquipLock, "", "§aClick to toggle!");
-        if (tag.getInt("DisabledSlots") == 31) equiplock.makeGlowing();
+        //Visible
+        String currentVisible = armorStand.isVisible() ? "§aEnabled" : "§cDisabled";
+        ItemBuilder visible = new ItemBuilder(Material.GLASS_BOTTLE)
+            .name("§b§lVisibility")
+            .lore("", "§7Current: " + currentVisible, "", "§aClick to toggle!");
+        if (armorStand.isVisible()) visible.makeGlowing();
+        if (armorStand.isVisible()) visible.material(Material.POTION);
+
+        //Name visibility
+        String currentNameVisible = armorStand.isCustomNameVisible() ? "§aEnabled" : "§cDisabled";
+        ItemBuilder nameVisible = new ItemBuilder(Material.NAME_TAG)
+            .name("§e§lName Visibility")
+            .lore("", "§7Current: " + currentNameVisible, "", "§aClick to toggle!");
+        if (armorStand.isCustomNameVisible()) nameVisible.makeGlowing();
 
         //Change name
         String currentName = armorStand.getCustomName() == null ? "§fArmor Stand" : StringUtil.colorize(armorStand.getCustomName());
-        ItemBuilder changeName = new ItemBuilder(Material.SIGN)
+        ItemBuilder changeName = new ItemBuilder(MenuAssets.signMaterial())
             .name("§e§lChange Name")
-            .lore("", "§7Current: "+currentName, "", "§aClick to change!");
+            .lore("", "§7Current: " + currentName, "", "§aClick to change!");
         if (armorStand.getCustomName() != null) changeName.makeGlowing();
 
-        //Delete
+        //----- 1.9+ -----
+
+        //Invulnerable
+        String currentInvul = ArmorStandAccess.isInvulnerable(armorStand) ? "§aEnabled" : "§cDisabled";
+        ItemBuilder invulnerable = new ItemBuilder(Material.GOLDEN_APPLE)
+            .name("§e§lInvulnerable")
+            .lore("", "§7Current: " + currentInvul, "", "§aClick to toggle!");
+        if (ArmorStandAccess.isInvulnerable(armorStand)) invulnerable.makeGlowing();
+
+        //Glow (1.9+)
+        ItemBuilder glow = null;
+        if (ServerFeatures.HAS_GLOW) {
+            String currentGlow = ArmorStandAccess.isGlowing(armorStand) ? "§aEnabled" : "§cDisabled";
+            glow = new ItemBuilder(Material.GLOWSTONE_DUST)
+                .name("§e§lGlow")
+                .lore("", "§7Current: " + currentGlow);
+            if (ServerFeatures.HAS_GLOW_COLOR) {
+                Color glowColor = ArmorStandAccess.getGlowColor(armorStand);
+                if (glowColor != null) glow.addLore("", "§7Color: §f#" + glowColorHex(glowColor));
+                glow.addLore("", "§aLeft click to toggle!", "§6Right click to change color!");
+            } else {
+                glow.addLore("", "§aClick to toggle!");
+            }
+            if (ArmorStandAccess.isGlowing(armorStand)) glow.makeGlowing();
+        }
+
+        //Silent (1.9+)
+        ItemBuilder silent = null;
+        if (ServerFeatures.HAS_SILENT) {
+            String currentSilent = ArmorStandAccess.isSilent(armorStand) ? "§aEnabled" : "§cDisabled";
+            silent = new ItemBuilder(MenuAssets.woolMaterial())
+                .name("§7§lSilent")
+                .lore("", "§7Current: " + currentSilent, "", "§aClick to toggle!");
+            if (ArmorStandAccess.isSilent(armorStand)) silent.makeGlowing();
+        }
+
+        //----- 1.16.2+ -----
+
+        //Equipment lock
+        String currentEquipLock = ArmorStandAccess.getDisabledSlots(armorStand) == ArmorStandAccess.EQUIPMENT_LOCK_MASK ? "§aEnabled" : "§cDisabled";
+        ItemBuilder equiplock = new ItemBuilder(Material.IRON_CHESTPLATE)
+            .name("§f§lEquipment Lock")
+            .lore("", "§7Current: " + currentEquipLock, "", "§aClick to toggle!");
+        if (ArmorStandAccess.getDisabledSlots(armorStand) == ArmorStandAccess.EQUIPMENT_LOCK_MASK) equiplock.makeGlowing();
+
+        //----- 1.20.5+ -----
+
+        //Scale (1.20.5+)
+        ItemBuilder scale = null;
+        if (ServerFeatures.HAS_SCALE) {
+            String currentScale = StringUtil.roundTwoDecimals(ArmorStandAccess.getScale(armorStand)) + "";
+            scale = new ItemBuilder(Material.QUARTZ)
+                .name("§d§lScale")
+                .lore("", "§7Current: §f" + currentScale, "", "§aClick to change!");
+            if (ArmorStandAccess.getScale(armorStand) != 1.0) scale.makeGlowing();
+        }
+
+        //Delete (always the last item)
         ItemBuilder delete = new ItemBuilder(Material.TNT)
             .name("§c§lDelete ArmorStand")
             .lore("", "§cClick to delete!");
 
+        //----- Layout: lowest supported version at the top, highest at the bottom -----
 
+        this.layout.put(10, small.build());
+        this.actionSlots.put(10, "SMALL");
 
-        this.layout.put(10, baseplate.build());
-        this.actionSlots.put(10,"BASEPLATE");
+        this.layout.put(11, marker.build());
+        this.actionSlots.put(11, "MARKER");
 
-        this.layout.put(11, arms.build());
-        this.actionSlots.put(11,"ARMS");
+        this.layout.put(12, arms.build());
+        this.actionSlots.put(12, "ARMS");
 
         this.layout.put(13, gravity.build());
-        this.actionSlots.put(13,"GRAVITY");
+        this.actionSlots.put(13, "GRAVITY");
 
-        this.layout.put(15, invulnerable.build());
-        this.actionSlots.put(15,"INVULNERABLE");
+        this.layout.put(14, baseplate.build());
+        this.actionSlots.put(14, "BASEPLATE");
 
-        this.layout.put(16, small.build());
-        this.actionSlots.put(16,"SMALL");
+        this.layout.put(15, visible.build());
+        this.actionSlots.put(15, "VISIBLE");
+
+        this.layout.put(16, nameVisible.build());
+        this.actionSlots.put(16, "NAMEVISIBLE");
 
         //Next line
 
-        this.layout.put(19, equiplock.build());
-        this.actionSlots.put(19,"EQUIPLOCK");
+        this.layout.put(19, changeName.build());
+        this.actionSlots.put(19, "CHANGENAME");
 
-        this.layout.put(20, visible.build());
-        this.actionSlots.put(20,"VISIBLE");
+        this.layout.put(20, invulnerable.build());
+        this.actionSlots.put(20, "INVULNERABLE");
 
-        this.layout.put(22, delete.build());
-        this.actionSlots.put(22,"DELETE");
+        if (glow != null) {
+            this.layout.put(21, glow.build());
+            this.actionSlots.put(21, "GLOW");
+        }
 
-        this.layout.put(24, changeName.build());
-        this.actionSlots.put(24, "CHANGENAME");
+        if (silent != null) {
+            this.layout.put(22, silent.build());
+            this.actionSlots.put(22, "SILENT");
+        }
 
-        this.layout.put(25, nameVisible.build());
-        this.actionSlots.put(25,"NAMEVISIBLE");
+        this.layout.put(23, equiplock.build());
+        this.actionSlots.put(23, "EQUIPLOCK");
 
+        if (scale != null) {
+            this.layout.put(24, scale.build());
+            this.actionSlots.put(24, "SCALE");
+        }
 
-
+        //Delete is always the last item
+        this.layout.put(25, delete.build());
+        this.actionSlots.put(25, "DELETE");
 
         super.render();
     }
@@ -178,13 +264,17 @@ public class PoseMenuSettings extends GUI {
 
         switch (action) {
             case "PAGE-EQUIPMENT":
-                new PoseMenuEquipment(player,armorStand).open();
+                new PoseMenuEquipment(player, armorStand).open();
                 break;
             case "PAGE-SETTINGS":
-                new PoseMenuSettings(player,armorStand).open();
+                new PoseMenuSettings(player, armorStand).open();
                 break;
             case "PAGE-POSITION":
-                new PoseMenuPositions(player,armorStand).open();
+                new PoseMenuPositions(player, armorStand).open();
+                break;
+
+            case "PAGE-PRESETS":
+                new PoseMenuPresets(player, armorStand).open();
                 break;
 
             case "SMALL":
@@ -193,15 +283,7 @@ public class PoseMenuSettings extends GUI {
                 break;
 
             case "INVULNERABLE":
-                NBTTagCompound tag = new NBTTagCompound();
-                ((CraftEntity) armorStand).getHandle().c(tag);
-                boolean currentInvul = tag.getInt("Invulnerable") == 1;
-                if (currentInvul)
-                    tag.setInt("Invulnerable", 0);
-                else
-                    tag.setInt("Invulnerable", 1);
-
-                ((CraftEntity) armorStand).getHandle().f(tag);
+                ArmorStandAccess.setInvulnerable(armorStand, !ArmorStandAccess.isInvulnerable(armorStand));
                 this.render();
                 break;
 
@@ -231,34 +313,108 @@ public class PoseMenuSettings extends GUI {
                 break;
 
             case "EQUIPLOCK":
-                NBTTagCompound equipLockTag = new NBTTagCompound();
-                ((CraftEntity) armorStand).getHandle().c(equipLockTag);
-                boolean currentEquipLock = equipLockTag.getInt("DisabledSlots") == 31;
-                if (currentEquipLock)
-                    equipLockTag.setInt("DisabledSlots", 0);
-                else
-                    equipLockTag.setInt("DisabledSlots", 31);
-
-                ((CraftEntity) armorStand).getHandle().f(equipLockTag);
+                boolean currentEquipLock = ArmorStandAccess.getDisabledSlots(armorStand) == ArmorStandAccess.EQUIPMENT_LOCK_MASK;
+                ArmorStandAccess.setDisabledSlots(armorStand, currentEquipLock ? 0 : ArmorStandAccess.EQUIPMENT_LOCK_MASK);
                 this.render();
                 break;
 
+            case "MARKER":
+                armorStand.setMarker(!armorStand.isMarker());
+                //Vanilla semantics: a marker stand cannot have arms
+                if (armorStand.isMarker()) armorStand.setArms(false);
+                this.render();
+                break;
+
+            case "GLOW":
+                if (clickType.isRightClick()) {
+                    //Glow color (1.17+); hidden on older versions
+                    if (!ServerFeatures.HAS_GLOW_COLOR) break;
+                    player.closeInventory();
+                    PoseMaster.sendMessage(player, "§7Write the glow color as a §fHEX color code§7.");
+                    PoseMaster.sendMessage(player, "§7Example: §f#FF55AA");
+                    if (ServerFeatures.usesTeamGlowColor())
+                        PoseMaster.sendMessage(player, "§7Snapped to the nearest of the §f16 §7vanilla glow colors.");
+
+                    new PoseAwaitResponse(player, 600L) {
+
+                        @Override
+                        public void onRespond(String message) {
+                            String value = message.trim().replace("#", "");
+                            if (!value.matches("[0-9a-fA-F]{6}")) {
+                                PoseMaster.sendMessage(player, "§4" + message + " §cis an invalid HEX color code!");
+                                return;
+                            }
+
+                            Color color = Color.fromRGB(Integer.parseInt(value, 16));
+                            ArmorStandAccess.setGlowColor(armorStand, color);
+                            ArmorStandAccess.setGlowing(armorStand, true);
+                            Color applied = ArmorStandAccess.getGlowColor(armorStand);
+                            String appliedHex = applied != null ? glowColorHex(applied) : value.toUpperCase();
+                            PoseMaster.sendMessage(player, "§aChanged the glow color to §2#" + appliedHex + "§a!");
+                        }
+
+                        @Override
+                        public void onTimeout() {
+                            PoseMaster.sendMessage(player, "§cYou took too long to respond!");
+                        }
+                    };
+                    break;
+                }
+
+                ArmorStandAccess.setGlowing(armorStand, !ArmorStandAccess.isGlowing(armorStand));
+                this.render();
+                break;
+
+            case "SILENT":
+                ArmorStandAccess.setSilent(armorStand, !ArmorStandAccess.isSilent(armorStand));
+                this.render();
+                break;
+
+            case "SCALE":
+                player.closeInventory();
+                PoseMaster.sendMessage(player, "§7Write the desired scale.");
+                PoseMaster.sendMessage(player, "§7Must be between §f0.0625 - 16.0§7.");
+
+                new PoseAwaitResponse(player, 600L) {
+
+                    @Override
+                    public void onRespond(String message) {
+
+                        double value;
+                        try {
+                            value = Double.parseDouble(message);
+                        } catch (NumberFormatException exception) {
+                            PoseMaster.sendMessage(player, "§4" + message + " §cis an invalid scale!");
+                            return;
+                        }
+
+                        ArmorStandAccess.setScale(armorStand, value);
+                        PoseMaster.sendMessage(player, "§aChanged the scale to §2" + StringUtil.roundTwoDecimals(ArmorStandAccess.getScale(armorStand)) + "§a!");
+                    }
+
+                    @Override
+                    public void onTimeout() {
+                        PoseMaster.sendMessage(player, "§cYou took too long to respond!");
+                    }
+                };
+                break;
+
             case "CHANGENAME":
-                PoseMaster.sendMessage(player,"§7Enter the new name for the ArmorStand.");
+                PoseMaster.sendMessage(player, "§7Enter the new name for the ArmorStand.");
                 player.closeInventory();
 
-                new PoseAwaitResponse(player,600L) {
+                new PoseAwaitResponse(player, 600L) {
 
                     @Override
                     public void onRespond(String message) {
                         String value = StringUtil.colorize(message);
                         armorStand.setCustomName(value);
-                        PoseMaster.sendMessage(player,"§aChanged the name to §2'"+value+"§2'§a!");
+                        PoseMaster.sendMessage(player, "§aChanged the name to §2'" + value + "§2'§a!");
                     }
 
                     @Override
                     public void onTimeout() {
-                        PoseMaster.sendMessage(player,"§cYou took too long to respond!");
+                        PoseMaster.sendMessage(player, "§cYou took too long to respond!");
                     }
                 };
                 break;
@@ -269,6 +425,11 @@ public class PoseMenuSettings extends GUI {
                 break;
         }
 
+    }
+
+    private static String glowColorHex(Color color) {
+        if (color == null) return "FFFFFF";
+        return String.format("%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
     }
 
 }

@@ -1,6 +1,9 @@
 package doodieman.posemaster.gui;
 
 import doodieman.posemaster.PoseMaster;
+import doodieman.posemaster.compat.ArmorStandAccess;
+import doodieman.posemaster.compat.MenuAssets;
+import doodieman.posemaster.compat.ServerFeatures;
 import doodieman.posemaster.utils.GUI;
 import doodieman.posemaster.utils.ItemBuilder;
 import org.bukkit.Material;
@@ -21,48 +24,66 @@ public class PoseMenuEquipment extends GUI {
     private final Map<Integer, String> actionSlots = new HashMap<>();
 
     public PoseMenuEquipment(Player player, ArmorStand armorStand) {
-        super(player, 5, "ID: "+armorStand.getEntityId());
+        super(player, 5, "ID: " + armorStand.getEntityId());
         this.setAllowAirSlots(true);
         this.armorStand = armorStand;
+    }
+
+    @Override
+    public void open() {
+        PoseMaster.getInstance().getLastMenuPageMap().put(player.getUniqueId(), "EQUIPMENT");
+        super.open();
     }
 
     public void createBottomItems() {
         //Create glass fill
         for (int i = 0; i < 9; i++)
-            this.layout.put(i+(4*9), GUIItem.GLASS_FILL.getItem());
+            this.layout.put(i + (4 * 9), GUIItem.GLASS_FILL.getItem());
 
         ItemBuilder position = new ItemBuilder(Material.ARMOR_STAND)
             .name("§e§lPosition")
             .lore("", "§fThis page is for changing the", "§fposition of the ArmorStand.", "", "§aClick to open!");
         ItemBuilder equipment = new ItemBuilder(Material.LEATHER_CHESTPLATE)
             .name("§6§lEquipment")
-            .lore( "", "§fThis page is for changing the", "§fequipment of the ArmorStand.", "", "§7§oCurrently selected!")
+            .lore("", "§fThis page is for changing the", "§fequipment of the ArmorStand.", "", "§7§oCurrently selected!")
             .makeGlowing();
         ItemBuilder settings = new ItemBuilder(Material.ANVIL)
             .name("§8§lSettings")
             .lore("", "§fThis page is for changing the", "§fsettings of the ArmorStand.", "", "§aClick to open!");
+        ItemBuilder presets = new ItemBuilder(Material.BOOK)
+            .name("§d§lPresets")
+            .lore("", "§fThis page is for saving and applying", "§fpresets to the ArmorStand.", "", "§aClick to open!");
 
         this.layout.put(39, position.build());
         this.actionSlots.put(39, "PAGE-POSITION");
         this.layout.put(40, equipment.build());
         this.layout.put(41, settings.build());
         this.actionSlots.put(41, "PAGE-SETTINGS");
+        this.layout.put(44, presets.build());
+        this.actionSlots.put(44, "PAGE-PRESETS");
     }
 
     @Override
     public void render() {
+        this.layout.clear();
+        this.actionSlots.clear();
+
         this.createBottomItems();
 
-        for (int i = 0; i < (4*9); i++) {
-            if (i >= 20 && i <= 24) continue;
-            this.layout.put(i,new ItemBuilder(Material.STAINED_GLASS_PANE, "").setDurability((short) 7).build());
+        int lastEquipmentSlot = ServerFeatures.HAS_OFF_HAND ? 25 : 24;
+        for (int i = 0; i < (4 * 9); i++) {
+            if (i >= 20 && i <= lastEquipmentSlot) continue;
+            this.layout.put(i, MenuAssets.grayGlassPane());
         }
 
-        this.layout.put(11,new ItemBuilder(Material.IRON_HELMET,"§f§lHelmet","", "§fPlace the helmet of the", "§fArmorStand below.").build());
-        this.layout.put(12,new ItemBuilder(Material.IRON_CHESTPLATE,"§f§lChestplate","", "§fPlace the chestplate of the", "§fArmorStand below.").build());
-        this.layout.put(13,new ItemBuilder(Material.IRON_LEGGINGS,"§f§lLeggings","", "§fPlace the leggings of the", "§fArmorStand below.").build());
-        this.layout.put(14,new ItemBuilder(Material.IRON_BOOTS,"§f§lBoots","", "§fPlace the boots of the", "§fArmorStand below.").build());
-        this.layout.put(15,new ItemBuilder(Material.IRON_SWORD,"§f§lTool","", "§fPlace the tool of the", "§fArmorStand below.").build());
+        this.layout.put(11, new ItemBuilder(Material.IRON_HELMET, "§f§lHelmet", "", "§fPlace the helmet of the", "§fArmorStand below.").build());
+        this.layout.put(12, new ItemBuilder(Material.IRON_CHESTPLATE, "§f§lChestplate", "", "§fPlace the chestplate of the", "§fArmorStand below.").build());
+        this.layout.put(13, new ItemBuilder(Material.IRON_LEGGINGS, "§f§lLeggings", "", "§fPlace the leggings of the", "§fArmorStand below.").build());
+        this.layout.put(14, new ItemBuilder(Material.IRON_BOOTS, "§f§lBoots", "", "§fPlace the boots of the", "§fArmorStand below.").build());
+        this.layout.put(15, new ItemBuilder(Material.IRON_SWORD, "§f§lMain Hand", "", "§fPlace the main-hand item of the", "§fArmorStand below.").build());
+        if (ServerFeatures.HAS_OFF_HAND) {
+            this.layout.put(16, new ItemBuilder(MenuAssets.shieldMaterial(), "§f§lOff Hand", "", "§fPlace the off-hand item of the", "§fArmorStand below.").build());
+        }
 
         super.render();
 
@@ -70,7 +91,10 @@ public class PoseMenuEquipment extends GUI {
         this.menu.setItem(21, armorStand.getChestplate());
         this.menu.setItem(22, armorStand.getLeggings());
         this.menu.setItem(23, armorStand.getBoots());
-        this.menu.setItem(24, armorStand.getItemInHand());
+        this.menu.setItem(24, ArmorStandAccess.getMainHand(armorStand));
+        if (ServerFeatures.HAS_OFF_HAND) {
+            this.menu.setItem(25, ArmorStandAccess.getOffHand(armorStand));
+        }
     }
 
     @Override
@@ -85,33 +109,52 @@ public class PoseMenuEquipment extends GUI {
 
         switch (action) {
             case "PAGE-EQUIPMENT":
-                new PoseMenuEquipment(player,armorStand).open();
+                new PoseMenuEquipment(player, armorStand).open();
                 break;
             case "PAGE-SETTINGS":
-                new PoseMenuSettings(player,armorStand).open();
+                new PoseMenuSettings(player, armorStand).open();
                 break;
             case "PAGE-POSITION":
-                new PoseMenuPositions(player,armorStand).open();
+                new PoseMenuPositions(player, armorStand).open();
+                break;
+
+            case "PAGE-PRESETS":
+                new PoseMenuPresets(player, armorStand).open();
                 break;
 
         }
     }
+
     @Override
     public void closed() {
         this.save();
     }
 
     public void save() {
+        final ItemStack helmet = cloneOrAir(this.menu.getItem(20));
+        final ItemStack chestplate = cloneOrAir(this.menu.getItem(21));
+        final ItemStack leggings = cloneOrAir(this.menu.getItem(22));
+        final ItemStack boots = cloneOrAir(this.menu.getItem(23));
+        final ItemStack mainHand = cloneOrAir(this.menu.getItem(24));
+        final ItemStack offHand = ServerFeatures.HAS_OFF_HAND ? cloneOrAir(this.menu.getItem(25)) : null;
+
         new BukkitRunnable() {
             @Override
             public void run() {
-                armorStand.setHelmet(menu.getItem(20));
-                armorStand.setChestplate(menu.getItem(21));
-                armorStand.setLeggings(menu.getItem(22));
-                armorStand.setBoots(menu.getItem(23));
-                armorStand.setItemInHand(menu.getItem(24));
+                if (!armorStand.isValid()) return;
+                armorStand.setHelmet(helmet);
+                armorStand.setChestplate(chestplate);
+                armorStand.setLeggings(leggings);
+                armorStand.setBoots(boots);
+                ArmorStandAccess.setMainHand(armorStand, mainHand);
+                if (offHand != null) ArmorStandAccess.setOffHand(armorStand, offHand);
             }
-        }.runTaskLater(PoseMaster.getInstance(),1L);
+        }.runTaskLater(PoseMaster.getInstance(), 1L);
+    }
+
+    private ItemStack cloneOrAir(ItemStack item) {
+        if (item == null) return new ItemStack(Material.AIR);
+        return item.clone();
     }
 
 }

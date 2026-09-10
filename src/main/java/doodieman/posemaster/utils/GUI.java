@@ -1,10 +1,10 @@
 package doodieman.posemaster.utils;
 
 import doodieman.posemaster.PoseMaster;
+import doodieman.posemaster.compat.MenuAssets;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
@@ -55,7 +55,7 @@ public class GUI implements Listener {
     public enum GUIItem {
 
         EXIT_MENU(new ItemBuilder(Material.NETHER_STAR,1, (byte) 0,"§fLuk menuen", "§7§oTryk for at lukke menuen.").build()),
-        GLASS_FILL(new ItemBuilder(Material.STAINED_GLASS_PANE, 1, (byte) 0, "§r").build()),
+        GLASS_FILL(new ItemBuilder(MenuAssets.whiteGlassPane()).name("§r").build()),
         BACK(new ItemBuilder(Material.ARROW, 1, (byte) 0, "§fTilbage","§7§oTryk for at gå tilbage","§7§otil den forrige menu.").build());
 
         private final ItemStack item;
@@ -96,7 +96,7 @@ public class GUI implements Listener {
     }
 
     public void playClickSound() {
-        player.playSound(player.getLocation(), Sound.CLICK,0.5f,1.2f);
+        MenuAssets.playClickSound(player);
     }
 
     //EVENT LISTENERS
